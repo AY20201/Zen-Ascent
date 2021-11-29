@@ -11,9 +11,9 @@ class Material
 	public:
 
 		Shader shader;
-		std::vector<Texture> textures;
+		Texture texture;
 
-		Material(Shader& shader, std::vector<Texture>& textures);
+		Material(Shader& shader, Texture& textures);
 		Material() = default;
 		void SetTextures();
 

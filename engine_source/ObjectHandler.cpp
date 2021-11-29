@@ -9,7 +9,7 @@ void ObjectHandler::AddGameObject(GameObject* gameObject)
 
 void ObjectHandler::DrawMeshes(Shader& shader)
 {
-	for (int i = 0; i < int(gameObjects.size()); i++)
+	for (int i = 0; i < gameObjects.size(); i++)
 	{
 		gameObjects[i]->mesh.Draw(shader, gameObjects[i]->transform.matrix);
 	}

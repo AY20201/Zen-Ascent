@@ -2,7 +2,6 @@
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 
-//all currently referencing wrong directory
 #include"engine_headers/GameObject.h"
 #include"engine_headers/Transform.h"
 #include"engine_headers/Mesh.h"
@@ -91,25 +90,22 @@ int main()
 	//specify opengl viewport
 	glViewport(0, 0, width, height);
 
-	Texture textures[]
-	{
-		Texture("brick.png", GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE)
-	};
+	Texture brickTexture = Texture("brick.png", GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE);
 
 	//ObjectHandler objectHandler;
 	Shader shaderProgram("default.vert", "default.frag");
 
 	std::vector <Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
 	std::vector <GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
-	std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
+	//std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	Camera camera(width, height, glm::vec3(0.0f, 0.5f, 2.0f));
 	//Player player(glm::vec3(0.0f, 0.25f, 2.0f), glm::vec3(0.0f, 0.25f, 0.0f), 0.6f);
 
-	PointLight light(lightPosition, lightColor);
-	Material material(shaderProgram, tex);
+	//PointLight light(lightPosition, lightColor);
+	Material material(shaderProgram, brickTexture);
 	Mesh pyramid(verts, ind, material);
 	//Skybox skybox(std::vector<const char*> {"skybox_sky_right.jpg","skybox_sky_left.jpg","skybox_sky_top.jpg","skybox_sky_bottom.jpg","skybox_sky_front.jpg","skybox_sky_back.jpg"});
 	//skybox.SetMeshData();
@@ -121,7 +117,7 @@ int main()
 
 	//lighting shader
 	shaderProgram.Activate();
-	light.SetUniforms(shaderProgram);
+	//light.SetUniforms(shaderProgram);
 
 	double currentTime = glfwGetTime();
 	double previousTime = glfwGetTime();

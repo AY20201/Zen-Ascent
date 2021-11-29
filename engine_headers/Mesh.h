@@ -19,7 +19,6 @@ class Mesh
 
 		VAO vao;
 
-		Mesh(Vertex vertices[], GLuint indices[], Material& material);
 		Mesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, Material& material);
 		void Draw(Shader& shader, glm::mat4 matrix);
 		Mesh() = default;

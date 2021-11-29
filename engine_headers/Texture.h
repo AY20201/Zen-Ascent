@@ -12,6 +12,7 @@ class Texture
 		GLuint ID;
 		GLenum type;
 		GLuint texUnit;
+		Texture() = default;
 		Texture(const char* imageFile, GLenum textureType, GLuint slot, GLenum format, GLenum pixelType);
 		void SetUniform(Shader& shader, const char* uniformName, GLuint unit);
 		void Bind();

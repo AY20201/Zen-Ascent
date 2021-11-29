@@ -1,16 +1,16 @@
 #include"../engine_headers/Material.h"
 
-Material::Material(Shader& shader, std::vector<Texture>& textures)
+Material::Material(Shader& shader, Texture& textures)
 {
 	Material::shader = shader;
-	Material::textures = textures;
+	Material::texture = texture;
 }
 
 void Material::SetTextures()
 {
 	shader.Activate();
-	textures[0].SetUniform(shader, "tex0", 0);
-	textures[0].Bind();
+	texture.SetUniform(shader, "tex", 0);
+	texture.Bind();
 
 	/*
 	unsigned int numTextures = 0;

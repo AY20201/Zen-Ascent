@@ -6,8 +6,8 @@ in vec2 texCoord;
 in vec3 currentPos;
 
 uniform sampler2D tex;
-uniform vec3 lightPos;
-uniform vec4 lightColor;
+//uniform vec3 lightPos;
+//uniform vec4 lightColor;
 
 void main()
 {
@@ -20,5 +20,5 @@ void main()
 	vec3 diffuseColor = diff * lightColor;
 	*/
 
-	FragColor = texture(tex, texCoord)/* * lightColor * diffuseColor*/;
+	FragColor = vec4(0.0, 0.0, 0.0, 1.0);//vec4(texture(tex, texCoord), 1.0);
 }
