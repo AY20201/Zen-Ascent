@@ -20,5 +20,5 @@ void main()
 	vec3 diffuseColor = diff * lightColor;
 	*/
 
-	FragColor = vec4(0.0, 0.0, 0.0, 1.0);//vec4(texture(tex, texCoord), 1.0);
+	FragColor = vec4(texture(tex, texCoord), 1.0);
 }

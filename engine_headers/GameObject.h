@@ -11,8 +11,7 @@ class GameObject
 		Transform transform;
 		Mesh mesh;
 
-		GameObject(Transform transform, Mesh mesh);
-		static GameObject Instantiate(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Mesh mesh);
+		GameObject(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Mesh mesh);
 
 };
 

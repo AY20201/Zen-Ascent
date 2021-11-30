@@ -29,5 +29,6 @@ void Mesh::Draw(Shader& shader, glm::mat4 matrix)
 	material.SetTextures();
 	glUniformMatrix4fv(glGetUniformLocation(shader.ID, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(matrix));
 	
+	
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
 }

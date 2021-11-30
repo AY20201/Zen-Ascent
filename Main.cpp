@@ -53,8 +53,8 @@ GLuint indices[] =
 	13, 15, 14 // Facing side
 };
 
-const unsigned int width = 1600;
-const unsigned int height = 1600;
+const unsigned int width = 800;
+const unsigned int height = 800;
 
 glm::vec3 lightPosition = glm::vec3(0.8f, 1.0f, 0.5f);
 glm::vec3 lightDirection = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -109,7 +109,7 @@ int main()
 	Mesh pyramid(verts, ind, material);
 	//Skybox skybox(std::vector<const char*> {"skybox_sky_right.jpg","skybox_sky_left.jpg","skybox_sky_top.jpg","skybox_sky_bottom.jpg","skybox_sky_front.jpg","skybox_sky_back.jpg"});
 	//skybox.SetMeshData();
-	GameObject smallPyramid = GameObject::Instantiate(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), pyramid);
+	GameObject smallPyramid(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), pyramid);
 	//GameObject bigPyramid = GameObject::Instantiate(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.5f), pyramid);
 
 	//Chunk chunk(glm::vec2(0.0f, 0.0f), material);

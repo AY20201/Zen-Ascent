@@ -11,7 +11,7 @@ class ObjectHandler
 
 		static ObjectHandler Instance;
 		std::vector <GameObject*> gameObjects;
-
+		
 		void AddGameObject(GameObject* gameObject);
 		void DrawMeshes(Shader& shader);
 
