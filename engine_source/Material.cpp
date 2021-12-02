@@ -1,6 +1,6 @@
 #include"../engine_headers/Material.h"
 
-Material::Material(Shader& shader, Texture& textures)
+Material::Material(Shader& shader, Texture& texture)
 {
 	Material::shader = shader;
 	Material::texture = texture;
