@@ -1,5 +1,5 @@
-#ifndef MESHHANDLER_CLASS_H
-#define MESHHANDLER_CLASS_H
+#ifndef OBJECTHANDLER_CLASS_H
+#define OBJECTHANDLER_CLASS_H
 
 #include "GameObject.h"
 #include "Shader.h"
@@ -13,6 +13,7 @@ class ObjectHandler
 		std::vector <GameObject*> gameObjects;
 		
 		void AddGameObject(GameObject* gameObject);
+		void DrawMeshes();
 		void DrawMeshes(Shader& shader);
 
 };

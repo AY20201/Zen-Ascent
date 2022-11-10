@@ -26,7 +26,7 @@ class Camera
 		int width;
 		int height;
 
-		float speed = 0.001f;
+		float speed = 0.05f;
 		float sensitivity = 100.0f;
 
 		//empty constructor for uninitalized camera in player class

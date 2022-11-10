@@ -15,13 +15,17 @@ class Mesh
 	public:
 		std::vector <Vertex> vertices;
 		std::vector <GLuint> indices;
-		Material material;
+		Material* material = new Material();
 
 		VAO vao;
 
-		Mesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, Material& material);
-		void Draw(Shader& shader, glm::mat4 matrix);
+		Mesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, Material* material, bool tangentsCalculated);
+		void Draw(glm::mat4 matrix);
+		void Draw(glm::mat4 matrix, Shader& shader);
 		Mesh() = default;
+
+	private:
+		void CalculateTangents();
 };
 
 #endif

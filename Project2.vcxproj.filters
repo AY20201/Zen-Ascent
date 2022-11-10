@@ -28,6 +28,9 @@
     <Filter Include="Resource Files\Textures">
       <UniqueIdentifier>{a9fbe665-7ea8-4924-8b90-de3f8c60ebbc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\engine_resource\3D Objects">
+      <UniqueIdentifier>{7e75c8b3-9509-4788-9e14-df3b1c2d044a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -78,6 +81,24 @@
     <ClCompile Include="engine_source\Texture.cpp">
       <Filter>Source Files\engine_source</Filter>
     </ClCompile>
+    <ClCompile Include="engine_source\LightHandler.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\FrameBufferObject.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\Plane.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\MeshScene.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\Skybox.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\ComputeShader.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine_headers\Material.h">
@@ -116,6 +137,24 @@
     <ClInclude Include="engine_headers\Light.h">
       <Filter>Header Files\engine_headers</Filter>
     </ClInclude>
+    <ClInclude Include="engine_headers\LightHandler.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\Plane.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\MeshScene.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\Skybox.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\ComputeShader.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\FrameBufferObject.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="brick.png">
@@ -124,12 +163,51 @@
     <Image Include="pop_cat.png">
       <Filter>Resource Files\Textures</Filter>
     </Image>
+    <Image Include="normal_map_test.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="brick_normal_map.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="brick_2.jpg">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="brick_2_normal_map.jpg">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="engine_resource\Textures\marble_herringbone_albedo.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="engine_resource\Textures\marble_herringbone_normal.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="default.frag">
+    <None Include="engine_resource\Shaders\water.vert">
       <Filter>Resource Files\engine_resource\Shaders</Filter>
     </None>
-    <None Include="default.vert">
+    <None Include="engine_resource\Shaders\water.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\default.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\default.vert">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\skybox.vert">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\skybox.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\depth.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\depth.vert">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\jitter.comp">
       <Filter>Resource Files\engine_resource\Shaders</Filter>
     </None>
   </ItemGroup>

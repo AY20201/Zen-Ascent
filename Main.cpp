@@ -5,10 +5,17 @@
 #include"engine_headers/GameObject.h"
 #include"engine_headers/Transform.h"
 #include"engine_headers/Mesh.h"
+#include"engine_headers/MeshScene.h"
+#include"engine_headers/Skybox.h"
 #include"engine_headers/Material.h"
 #include"engine_headers/ObjectHandler.h"
+#include"engine_headers/LightHandler.h"
 #include"engine_source/PointLight.cpp"
+#include"engine_source/DirectionalLight.cpp"
 #include"engine_headers/Camera.h"
+#include"engine_headers/FrameBufferObject.h"
+#include"engine_headers/ComputeShader.h"
+#include"engine_headers/Plane.h"
 
 /*GLfloat vertices[] =
 {
@@ -22,25 +29,25 @@
 Vertex vertices[] =
 {
 	Vertex{glm::vec3(-0.5f, 0.0f,  0.5f), glm::vec2(0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)}, // Bottom side
-	Vertex{glm::vec3(-0.5f, 0.0f, -0.5f), glm::vec2(0.0f, 5.0f), glm::vec3(0.0f, -1.0f, 0.0f)}, // Bottom side
-	Vertex{glm::vec3(0.5f, 0.0f,  -0.5f), glm::vec2(5.0f, 5.0f), glm::vec3(0.0f, -1.0f, 0.0f)}, // Bottom side
-	Vertex{glm::vec3(0.5f, 0.0f,  0.5f), glm::vec2(5.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)}, // Bottom side
+	Vertex{glm::vec3(-0.5f, 0.0f, -0.5f), glm::vec2(0.0f, 2.0f), glm::vec3(0.0f, -1.0f, 0.0f)}, // Bottom side
+	Vertex{glm::vec3(0.5f, 0.0f,  -0.5f), glm::vec2(2.0f, 2.0f), glm::vec3(0.0f, -1.0f, 0.0f)}, // Bottom side
+	Vertex{glm::vec3(0.5f, 0.0f,  0.5f), glm::vec2(2.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)}, // Bottom side
 
 	Vertex{glm::vec3(-0.5f, 0.0f,  0.5f), glm::vec2(0.0f, 0.0f), glm::vec3(-0.8f, 0.5f, 0.0f)}, // Left side
-	Vertex{glm::vec3(-0.5f, 0.0f,  -0.5f), glm::vec2(5.0f, 0.0f), glm::vec3(-0.8f, 0.5f, 0.0f)}, // Left side
-	Vertex{glm::vec3(0.0f, 0.8f,  0.0f), glm::vec2(2.5f, 5.0f), glm::vec3(-0.8f, 0.5f,  0.0f)}, // Left side
+	Vertex{glm::vec3(-0.5f, 0.0f,  -0.5f), glm::vec2(2.0f, 0.0f), glm::vec3(-0.8f, 0.5f, 0.0f)}, // Left side
+	Vertex{glm::vec3(0.0f, 0.8f,  0.0f), glm::vec2(1.0f, 2.0f), glm::vec3(-0.8f, 0.5f,  0.0f)}, // Left side
 
-	Vertex{glm::vec3(-0.5f, 0.0f,  -0.5f), glm::vec2(5.0f, 0.0f), glm::vec3(0.0f, 0.5f, -0.8f)}, // Non-facing side
+	Vertex{glm::vec3(-0.5f, 0.0f,  -0.5f), glm::vec2(2.0f, 0.0f), glm::vec3(0.0f, 0.5f, -0.8f)}, // Non-facing side
 	Vertex{glm::vec3(0.5f, 0.0f,  -0.5f), glm::vec2(0.0f, 0.0f), glm::vec3(0.0f, 0.5f, -0.8f)}, // Non-facing side
-	Vertex{glm::vec3(0.0f, 0.8f,  0.0f), glm::vec2(2.5f, 5.0f), glm::vec3(0.0f, 0.5f, -0.8f)}, // Non-facing side
+	Vertex{glm::vec3(0.0f, 0.8f,  0.0f), glm::vec2(1.0f, 2.0f), glm::vec3(0.0f, 0.5f, -0.8f)}, // Non-facing side
 
 	Vertex{glm::vec3(0.5f, 0.0f,  -0.5f), glm::vec2(0.0f, 0.0f), glm::vec3(0.8f, 0.5f,  0.0f)}, // Right side
-	Vertex{glm::vec3(0.5f, 0.0f,  0.5f), glm::vec2(5.0f, 0.0f), glm::vec3(0.8f, 0.5f,  0.0f)}, // Right side
-	Vertex{glm::vec3(0.0f, 0.8f,  0.0f), glm::vec2(2.5f, 5.0f), glm::vec3(0.8f, 0.5f,  0.0f)}, // Right side
+	Vertex{glm::vec3(0.5f, 0.0f,  0.5f), glm::vec2(2.0f, 0.0f), glm::vec3(0.8f, 0.5f,  0.0f)}, // Right side
+	Vertex{glm::vec3(0.0f, 0.8f,  0.0f), glm::vec2(1.0f, 2.0f), glm::vec3(0.8f, 0.5f,  0.0f)}, // Right side
 
-	Vertex{glm::vec3(0.5f, 0.0f,  0.5f), glm::vec2(5.0f, 0.0f), glm::vec3(0.0f, 0.5f,  0.8f)}, // Facing side
+	Vertex{glm::vec3(0.5f, 0.0f,  0.5f), glm::vec2(2.0f, 0.0f), glm::vec3(0.0f, 0.5f,  0.8f)}, // Facing side
 	Vertex{glm::vec3(-0.5f, 0.0f,  0.5f), glm::vec2(0.0f, 0.0f), glm::vec3(0.0f, 0.5f,  0.8f)}, // Facing side
-	Vertex{glm::vec3(0.0f, 0.8f,  0.0f), glm::vec2(2.5f, 5.0f), glm::vec3(0.0f, 0.5f,  0.8f)} // Facing side
+	Vertex{glm::vec3(0.0f, 0.8f,  0.0f), glm::vec2(1.0f, 2.0f), glm::vec3(0.0f, 0.5f,  0.8f)} // Facing side
 };
 
 GLuint indices[] =
@@ -53,21 +60,20 @@ GLuint indices[] =
 	13, 15, 14 // Facing side
 };
 
-const unsigned int width = 800;
-const unsigned int height = 800;
-
-glm::vec3 lightPosition = glm::vec3(0.8f, 1.0f, 0.5f);
-glm::vec3 lightDirection = glm::vec3(1.0f, 1.0f, 1.0f);
-glm::vec3 lightColor = glm::vec3(0.8f, 0.6f, 0.9f);
+const unsigned int width = 1600;
+const unsigned int height = 1600;
 
 glm::vec3 modelPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+
+float nearClipPlane = 0.1f;
+float farClipPlane = 100.0f;
 
 int main()
 {
 	glfwInit();
 
 	//specify opengl version
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	//specify opengl profile, core has most up to date functions
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -87,37 +93,80 @@ int main()
 	//load opengl through glad
 	gladLoadGL();
 
+	//compute shaders always first for easy binding in shaders
+	ComputeShader jitterComputeShader("engine_resource/Shaders/jitter.comp");
+	jitterComputeShader.AttachTexture(2048, 2048);
+
+	//create secondary framebuffers
+	FrameBufferObject shadowMapFrameBuffer(2048, 2048);
+	
 	//specify opengl viewport
 	glViewport(0, 0, width, height);
 
-	Texture brickTexture = Texture("brick.png", GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE);
+	Texture* defaultAlbedo = new Texture("engine_resource/Textures/default_albedo.png", GL_TEXTURE_2D, GL_LINEAR, /*1,*/ GL_RGB, GL_UNSIGNED_BYTE);
+	Texture* defaultNormalMap = new Texture("engine_resource/Textures/default_normal.png", GL_TEXTURE_2D, GL_LINEAR, /*1,*/ GL_RGB, GL_UNSIGNED_BYTE);
+	//Texture* defaultSpecMap = new Texture("engine_resource/Textures/default_albedo.png", GL_TEXTURE_2D, GL_LINEAR, /*1,*/ GL_RGB, GL_UNSIGNED_BYTE);
 
+	Texture::defaultAlbedo = defaultAlbedo;
+	Texture::defaultNormalMap = defaultNormalMap;
+	//Texture::defaultSpecMap = defaultSpecMap;
+	
+	Texture* brickTexture = new Texture("engine_resource/Textures/marble_herringbone_albedo.png", GL_TEXTURE_2D, GL_LINEAR, /*0,*/ GL_RGB, GL_UNSIGNED_BYTE);
+	Texture* normalMap = new Texture("engine_resource/Textures/marble_herringbone_normal.png", GL_TEXTURE_2D, GL_LINEAR, /*1,*/ GL_RGB, GL_UNSIGNED_BYTE);
+	//Texture* marbleSpecMap = new Texture("engine_resource/Textures/marble_herringbone_roughness.png", GL_TEXTURE_2D, GL_LINEAR, /*1,*/ GL_RGB, GL_UNSIGNED_BYTE);
+	
 	//ObjectHandler objectHandler;
-	Shader shaderProgram("default.vert", "default.frag");
+	Shader shaderProgram("engine_resource/Shaders/default.vert", "engine_resource/Shaders/default.frag");
+	Shader skyBoxShaderProgram("engine_resource/Shaders/skybox.vert", "engine_resource/Shaders/skybox.frag");
+	Shader shadowShaderProgram("engine_resource/Shaders/depth.vert", "engine_resource/Shaders/depth.frag");
+
+	//Shader waterShader("engine_resource/Shaders/water.vert", "engine_resource/Shaders/water.frag");
 
 	std::vector <Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
 	std::vector <GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
-	//std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	Camera camera(width, height, glm::vec3(0.0f, 0.5f, 2.0f));
-	//Player player(glm::vec3(0.0f, 0.25f, 2.0f), glm::vec3(0.0f, 0.25f, 0.0f), 0.6f);
 
-	//PointLight light(lightPosition, lightColor);
-	Material material(shaderProgram, brickTexture);
-	Mesh pyramid(verts, ind, material);
-	//Skybox skybox(std::vector<const char*> {"skybox_sky_right.jpg","skybox_sky_left.jpg","skybox_sky_top.jpg","skybox_sky_bottom.jpg","skybox_sky_front.jpg","skybox_sky_back.jpg"});
-	//skybox.SetMeshData();
+	PointLight light(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+	PointLight light2(glm::vec3(-0.8f, 1.0f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+	PointLight light3(glm::vec3(0.8f, 1.0f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+
+	DirectionalLight globalDirectionalLight(glm::vec3(0.6f, -0.5f, -0.5f), glm::vec3(1.0f, 0.98f, 0.94f), 1.25f);
+
+	Material* material = new Material(shaderProgram, TexParam{ "albedo", brickTexture, 1.0 }, TexParam{"normalMap", normalMap, 1.0}/*TexParam{"specMap", marbleSpecMap, 1.0}*/);
+
+	//Material* waterMaterial = new Material(waterShader, nullptr, nullptr);
+
+	Skybox sceneSkyBox(std::vector<const char*>{
+		"engine_resource/Textures/cloud_skybox/clouds1_east.bmp", //right
+		"engine_resource/Textures/cloud_skybox/clouds1_west.bmp", //left
+		"engine_resource/Textures/cloud_skybox/clouds1_up.bmp", //up
+		"engine_resource/Textures/cloud_skybox/clouds1_down.bmp", //down
+		"engine_resource/Textures/cloud_skybox/clouds1_north.bmp", //front
+		"engine_resource/Textures/cloud_skybox/clouds1_south.bmp"}, //back
+		skyBoxShaderProgram);
+
+	Mesh pyramid(verts, ind, material, false);
+	Plane plane(10.0f, 10, 1.0, /*waterMaterial*/ material);
+
+	Transform defaultTransform(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+	
+	//MeshScene importedCube(Transform(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0f), glm::vec3(0.25f)), "engine_resource/3D Objects/cube/cube.obj", shaderProgram, nullptr);
+	MeshScene importedMonkey(Transform(glm::vec3(-1.0f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec3(0.35f)), "engine_resource/3D Objects/textured_monkey/monkey.obj", shaderProgram, nullptr);
+	MeshScene importedDonut(Transform(glm::vec3(-2.5f, 0.25f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f)), "engine_resource/3D Objects/colored_donut/colored_donut.obj", shaderProgram, nullptr);
+
 	GameObject smallPyramid(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), pyramid);
-	//GameObject bigPyramid = GameObject::Instantiate(glm::vec3(2.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.5f), pyramid);
-
-	//Chunk chunk(glm::vec2(0.0f, 0.0f), material);
-	//World::Instance.GenerateWorld(material);
-
+	GameObject planeObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), plane.mesh);
+	
 	//lighting shader
 	shaderProgram.Activate();
-	//light.SetUniforms(shaderProgram);
+	LightHandler::Instance.SetLightUniforms(shaderProgram);
+
+	//waterShader.Activate();
+	//glUniform1f(glGetUniformLocation(waterShader.ID, "nearClipPlane"), nearClipPlane);
+	//glUniform1f(glGetUniformLocation(waterShader.ID, "farClipPlane"), farClipPlane);
 
 	double currentTime = glfwGetTime();
 	double previousTime = glfwGetTime();
@@ -136,19 +185,49 @@ int main()
 		deltaTime = (float)currentTime - (float)previousTime;
 		previousTime = currentTime;
 
-		//player.Update(camera, deltaTime, window);
 		camera.FlyController(window);
-		camera.UpdateMatrix(45.0f, 0.1f, 100.0f);
+		camera.UpdateMatrix(45.0f, nearClipPlane, farClipPlane);
 		camera.SetMatrix(shaderProgram, "camMatrix");
+		//camera.SetMatrix(waterShader, "camMatrix");
+		skyBoxShaderProgram.Activate();
+		glUniformMatrix4fv(glGetUniformLocation(skyBoxShaderProgram.ID, "camMatrix"), 1, GL_FALSE, glm::value_ptr(camera.projection * glm::mat4(glm::mat3(camera.view))));
 
-		//skybox.SetUniform(skyboxShaderProgram);
+		shaderProgram.Activate();
+		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 
-		//shaderProgram.Activate();
-		//glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPosition"), camera.Position.x, camera.Position.y, camera.Position.z);
+		glUniform1i(glGetUniformLocation(shaderProgram.ID, "skybox"), sceneSkyBox.texUnit);
+		sceneSkyBox.Bind();
 
-		//skybox.Draw(skyboxShaderProgram, camera);
-		//LightingHandler::Instance.SetLights(shaderProgram);
-		ObjectHandler::Instance.DrawMeshes(shaderProgram);
+		glm::mat4 lightProj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f); //hard coded change later
+		glm::mat4 lightView = glm::lookAt(-globalDirectionalLight.direction * glm::vec3(10.0), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+		shadowShaderProgram.Activate();
+		glUniformMatrix4fv(glGetUniformLocation(shadowShaderProgram.ID, "lightMatrix"), 1, GL_FALSE, glm::value_ptr(lightProj * lightView));
+		shaderProgram.Activate();
+		glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "lightMatrix"), 1, GL_FALSE, glm::value_ptr(lightProj * lightView));
+		
+		jitterComputeShader.Dispatch();
+
+		glCullFace(GL_FRONT);
+		shadowMapFrameBuffer.BindFrameBuffer();
+		glClear(GL_DEPTH_BUFFER_BIT);
+		ObjectHandler::Instance.DrawMeshes(shadowShaderProgram);
+		shadowMapFrameBuffer.UnbindFrameBuffer();
+		glCullFace(GL_BACK);
+
+		glViewport(0, 0, width, height);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		shaderProgram.Activate();
+		shadowMapFrameBuffer.SetTexture(shadowMapFrameBuffer.depthTexture, shaderProgram, "shadowMap");
+		//jitterComputeShader.SetTexture(shaderProgram, "jitterMap");
+
+		glUniform1i(glGetUniformLocation(shaderProgram.ID, "jitterMap"), jitterComputeShader.textureUnit);
+		jitterComputeShader.BindTexture();
+
+		ObjectHandler::Instance.DrawMeshes();
+		sceneSkyBox.Draw();
+
+		//shadowMapFrameBuffer.UnbindTexture();
 
 		//clear and draw screen
 		glfwSwapBuffers(window);
@@ -156,7 +235,24 @@ int main()
 		glfwPollEvents();
 	}
 
+	//importedCube.Clear();
+	importedMonkey.Clear();
+	importedDonut.Clear();
+
 	shaderProgram.Delete();
+	skyBoxShaderProgram.Delete();
+	shadowShaderProgram.Delete();
+	//waterShader.Delete();
+	shadowMapFrameBuffer.Delete();
+
+	delete defaultAlbedo;
+	delete defaultNormalMap;
+	
+	delete brickTexture;
+	delete normalMap;
+
+	delete material;
+	//delete waterMaterial;
 
 	glfwTerminate();
 	return 0;

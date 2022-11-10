@@ -16,6 +16,7 @@ public:
 	GLuint ID;
 	Shader(const char* vertexFile, const char* fragmentFile);
 	Shader() = default;
+	//void SetUniformFloat(const char* uniformName, float value);
 
 	void Activate();
 	void Delete();
