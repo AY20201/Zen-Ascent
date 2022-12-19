@@ -30,7 +30,7 @@ Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, Material
 // code from https://ogldev.org/www/tutorial26/tutorial26.html
 void Mesh::CalculateTangents()
 {
-	for (int i = 0; i < indices.size(); i += 3)
+	for (unsigned int i = 0; i < indices.size(); i += 3)
 	{
 		Vertex& v0 = vertices[indices[i]];
 		Vertex& v1 = vertices[indices[i + 1]];
@@ -59,22 +59,28 @@ void Mesh::CalculateTangents()
 
 void Mesh::Draw(glm::mat4 matrix)
 {
-	material->shader.Activate();
-	vao.Bind();
+	if (vertices.size() > 0)
+	{
+		material->shader.Activate();
+		vao.Bind();
 
-	material->SetTextures();
-	glUniformMatrix4fv(glGetUniformLocation(material->shader.ID, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(matrix));
-	
-	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, (void*)0);
+		material->SetTextures();
+		glUniformMatrix4fv(glGetUniformLocation(material->shader.ID, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(matrix));
+
+		glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, (void*)0);
+	}
 }
 
 void Mesh::Draw(glm::mat4 matrix, Shader& shader)
 {
-	shader.Activate();
-	vao.Bind();
+	if (vertices.size() > 0)
+	{
+		shader.Activate();
+		vao.Bind();
 
-	//material->SetTextures();
-	glUniformMatrix4fv(glGetUniformLocation(shader.ID, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(matrix));
+		//material->SetTextures();
+		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(matrix));
 
-	glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, (void*)0);
+		glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, (void*)0);
+	}
 }

@@ -15,7 +15,7 @@ public:
 	int attachedTextureHeight;
 
 	ComputeShader(const char* file);
-	//ComputeShader() = default;
+	ComputeShader() = default;
 
 	void AttachTexture(int textureWidth, int textureHeight);
 	void BindTexture();

@@ -31,6 +31,12 @@
     <Filter Include="Resource Files\engine_resource\3D Objects">
       <UniqueIdentifier>{7e75c8b3-9509-4788-9e14-df3b1c2d044a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\game_headers">
+      <UniqueIdentifier>{f93dd93d-8786-40c1-90d8-e89d601420ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\game_source">
+      <UniqueIdentifier>{8e62216f-ff60-426a-88f0-779aee2dca81}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -99,6 +105,39 @@
     <ClCompile Include="engine_source\ComputeShader.cpp">
       <Filter>Source Files\engine_source</Filter>
     </ClCompile>
+    <ClCompile Include="engine_source\BloomRenderer.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\Behavior.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="game_source\PlayerController.cpp">
+      <Filter>Source Files\game_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\CollisionPlane.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\CollisionPacket.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\CollisionObject.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\CollisionMesh.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\CollisionSolver.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\ShadowChunker.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\Raycast.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_source\AABB.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine_headers\Material.h">
@@ -155,6 +194,39 @@
     <ClInclude Include="engine_headers\FrameBufferObject.h">
       <Filter>Header Files\engine_headers</Filter>
     </ClInclude>
+    <ClInclude Include="engine_headers\BloomRenderer.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\Behavior.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="game_headers\PlayerController.h">
+      <Filter>Header Files\game_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\CollisionPacket.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\CollisionPlane.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\CollisionObject.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\CollisionMesh.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\CollisionSolver.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\ShadowChunker.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\Raycast.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\AABB.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="brick.png">
@@ -208,6 +280,33 @@
       <Filter>Resource Files\engine_resource\Shaders</Filter>
     </None>
     <None Include="engine_resource\Shaders\jitter.comp">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\postprocess.vert">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\tonemapper.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\fog.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\upsampler.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\downsampler.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\basepostprocesser.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\terraingen.comp">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\gbuffer.vert">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\gbuffer.frag">
       <Filter>Resource Files\engine_resource\Shaders</Filter>
     </None>
   </ItemGroup>

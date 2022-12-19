@@ -13,6 +13,7 @@
 class Mesh
 {
 	public:
+
 		std::vector <Vertex> vertices;
 		std::vector <GLuint> indices;
 		Material* material = new Material();

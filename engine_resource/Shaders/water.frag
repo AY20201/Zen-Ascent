@@ -4,26 +4,20 @@ out vec4 FragColor;
 in vec2 texCoord;
 in vec3 normal;
 in vec4 currentPos;
+in vec3 tangent;
 
 uniform float nearClipPlane;
 uniform float farClipPlane;
 
-//uniform sampler2D depthSampler;
-
-float LinearDepth(float depth)
-{
-	float z = depth * 2.0 - 1.0;
-	return (2.0 * nearClipPlane * farClipPlane) / (farClipPlane + nearClipPlane - z * (farClipPlane - nearClipPlane));
-}
+uniform vec3 camPos;
+uniform sampler2D depthSampler;
 
 void main()
 {
 	vec2 deviceCoord = (currentPos.xy / currentPos.w) / 2.0 + 0.5;
-	vec2 textureCoord = vec2(deviceCoord.x, deviceCoord.y);
 
-	//float terrainDepth = texture(depthSampler, textureCoord).r;
-	//float terrainDistance = LinearDepth(terrainDepth);
+	float terrainDepth = texture(depthSampler, vec2(deviceCoord.x, deviceCoord.y)).r;
+	vec3 viewDir = normalize(camPos - currentPos);
 
-	float depth = LinearDepth(gl_FragCoord.z) / farClipPlane;
 	FragColor = vec4(vec3(depth), 1.0);
 }

@@ -19,7 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="engine_source\AABB.cpp" />
+    <ClCompile Include="engine_source\Behavior.cpp" />
+    <ClCompile Include="engine_source\BloomRenderer.cpp" />
     <ClCompile Include="engine_source\Camera.cpp" />
+    <ClCompile Include="engine_source\CollisionMesh.cpp" />
+    <ClCompile Include="engine_source\CollisionObject.cpp" />
+    <ClCompile Include="engine_source\CollisionPacket.cpp" />
+    <ClCompile Include="engine_source\CollisionPlane.cpp" />
+    <ClCompile Include="engine_source\CollisionSolver.cpp" />
     <ClCompile Include="engine_source\ComputeShader.cpp" />
     <ClCompile Include="engine_source\DirectionalLight.cpp" />
     <ClCompile Include="engine_source\EBO.cpp" />
@@ -33,17 +41,28 @@
     <ClCompile Include="engine_source\ObjectHandler.cpp" />
     <ClCompile Include="engine_source\Plane.cpp" />
     <ClCompile Include="engine_source\PointLight.cpp" />
+    <ClCompile Include="engine_source\Raycast.cpp" />
     <ClCompile Include="engine_source\Shader.cpp" />
+    <ClCompile Include="engine_source\ShadowChunker.cpp" />
     <ClCompile Include="engine_source\Skybox.cpp" />
     <ClCompile Include="engine_source\Texture.cpp" />
     <ClCompile Include="engine_source\Transform.cpp" />
     <ClCompile Include="engine_source\VAO.cpp" />
     <ClCompile Include="engine_source\VBO.cpp" />
+    <ClCompile Include="game_source\PlayerController.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="stb.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="engine_headers\AABB.h" />
+    <ClInclude Include="engine_headers\Behavior.h" />
+    <ClInclude Include="engine_headers\BloomRenderer.h" />
     <ClInclude Include="engine_headers\Camera.h" />
+    <ClInclude Include="engine_headers\CollisionMesh.h" />
+    <ClInclude Include="engine_headers\CollisionObject.h" />
+    <ClInclude Include="engine_headers\CollisionPacket.h" />
+    <ClInclude Include="engine_headers\CollisionPlane.h" />
+    <ClInclude Include="engine_headers\CollisionSolver.h" />
     <ClInclude Include="engine_headers\ComputeShader.h" />
     <ClInclude Include="engine_headers\EBO.h" />
     <ClInclude Include="engine_headers\FrameBufferObject.h" />
@@ -55,12 +74,15 @@
     <ClInclude Include="engine_headers\MeshScene.h" />
     <ClInclude Include="engine_headers\ObjectHandler.h" />
     <ClInclude Include="engine_headers\Plane.h" />
+    <ClInclude Include="engine_headers\Raycast.h" />
     <ClInclude Include="engine_headers\Shader.h" />
+    <ClInclude Include="engine_headers\ShadowChunker.h" />
     <ClInclude Include="engine_headers\Skybox.h" />
     <ClInclude Include="engine_headers\Texture.h" />
     <ClInclude Include="engine_headers\Transform.h" />
     <ClInclude Include="engine_headers\VAO.h" />
     <ClInclude Include="engine_headers\VBO.h" />
+    <ClInclude Include="game_headers\PlayerController.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="brick.png" />
@@ -73,13 +95,22 @@
     <Image Include="pop_cat.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="engine_resource\Shaders\basepostprocesser.frag" />
     <None Include="engine_resource\Shaders\default.frag" />
     <None Include="engine_resource\Shaders\default.vert" />
     <None Include="engine_resource\Shaders\depth.frag" />
     <None Include="engine_resource\Shaders\depth.vert" />
+    <None Include="engine_resource\Shaders\downsampler.frag" />
+    <None Include="engine_resource\Shaders\fog.frag" />
+    <None Include="engine_resource\Shaders\gbuffer.frag" />
+    <None Include="engine_resource\Shaders\gbuffer.vert" />
     <None Include="engine_resource\Shaders\jitter.comp" />
+    <None Include="engine_resource\Shaders\terraingen.comp" />
+    <None Include="engine_resource\Shaders\tonemapper.frag" />
+    <None Include="engine_resource\Shaders\postprocess.vert" />
     <None Include="engine_resource\Shaders\skybox.frag" />
     <None Include="engine_resource\Shaders\skybox.vert" />
+    <None Include="engine_resource\Shaders\upsampler.frag" />
     <None Include="engine_resource\Shaders\water.frag" />
     <None Include="engine_resource\Shaders\water.vert" />
   </ItemGroup>

@@ -116,22 +116,24 @@ float CalculateShadow(vec4 fragPosLightSpace, float bias)
 	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
 
 	float softness = 1.25;
+	float jitterSize = 1.5;
 
-	for(int x = -2; x <= 2; x++)
+	int sampleRadius = 2;
+
+	for(int x = -sampleRadius; x <= sampleRadius; x++)
 	{
-		for(int y = -2; y <= 2; y++)
+		for(int y = -sampleRadius; y <= sampleRadius; y++)
 		{
-			//vec2 normalizedCoords = vec2((x + 1.0) / 2.0, (y + 1.0) / 2.0);
-			//vec2 discCoords = vec2(sqrt(normalizedCoords.y) * cos(2.0 * PI * normalizedCoords.x), sqrt(normalizedCoords.y) * sin(2.0 * PI * normalizedCoords.x));
-			//discCoords = discCoords * 2.0 - 1.0;
+			vec2 scaled = vec2(x, y) / float(sampleRadius);
+			vec2 circle = vec2(scaled.x * sqrt(1.0 - 0.5 * (scaled.y * scaled.y)), scaled.y * sqrt(1.0 - 0.5 * (scaled.x * scaled.x)));
 
 			vec2 jitterSample = texture(jitterMap, projCoords.xy + vec2(x, y) * softness * texelSize).xy;
-			float pcfDepth = texture(shadowMap, projCoords.xy + (vec2(x, y) + jitterSample) * softness * texelSize).r;
+			float pcfDepth = texture(shadowMap, projCoords.xy + (circle + jitterSample * jitterSize) * softness * texelSize).r;
 			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 		}
 	}
 	
-	shadow /= 25.0;
+	shadow /= ((sampleRadius * 2.0 + 1.0) * (sampleRadius * 2.0 + 1.0));
 
 	return shadow;
 }
@@ -188,4 +190,5 @@ void main()
 	//float4 diffuseColor = texture(albedo, texCoord * albedoScale);
 
 	FragColor = texture(albedo, texCoord * albedoScale) * vec4(albedoColor, 1.0) * vec4(max(lightResult, sceneAmbience), 1.0);
+	//FragColor = vec4(1.5, 1.5, 1.5, 1.0);
 }

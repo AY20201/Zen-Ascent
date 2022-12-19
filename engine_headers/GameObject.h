@@ -3,15 +3,22 @@
 
 #include"Transform.h"
 #include"Mesh.h"
+#include<vector>
+
+class Behavior;
 
 class GameObject
 {
 	public:
 
 		Transform transform;
-		Mesh mesh;
+		std::vector<Mesh> meshes;
+		Behavior* behavior;
 
-		GameObject(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Mesh mesh);
+		int id;
+
+		GameObject(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, Mesh mesh, Behavior* behavior);
+		GameObject(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, std::vector<Mesh> meshes, Behavior* behavior);
 
 };
 

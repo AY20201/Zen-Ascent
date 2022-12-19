@@ -27,7 +27,8 @@ struct TextureObject
 class FrameBufferObject
 {
 public:
-	FrameBufferObject(int screenWidth, int screenHeight);
+	FrameBufferObject() = default;
+	FrameBufferObject(int screenWidth, int screenHeight, int numColorTex, int numDepthTex);
 	
 	int screenWidth, screenHeight;
 
@@ -35,16 +36,13 @@ public:
 	std::vector<Vertex> quadVerts;
 
 	GLuint bufferID;
-	TextureObject depthTexture;
-	TextureObject colorTexture;
-	//GLuint textureID;
-	//GLuint textureUnit;
+	std::vector<TextureObject> depthTextures;
+	std::vector<TextureObject> colorTextures;
+	//TextureObject depthTexture;
+	//TextureObject colorTexture;
 
-	//GLuint CreateDepthTextureAttachment();
-	//GLuint CreateDepthBufferAttachment();
-
-	void AttachDepthTexture();
-	void AttachColorTexture();
+	void AttachDepthTexture(TextureObject& texObj);
+	void AttachColorTexture(TextureObject& texObj, GLuint index);
 	void BindTexture(TextureObject& texObj);
 	void UnbindTexture();
 	void BindFrameBuffer();
@@ -55,9 +53,6 @@ public:
 	void RenderQuad(Shader& shader);
 
 	void Delete();
-
-	//Texture* GetRefractionTexture();
-	//Texture* GetRefractionDepthTexture();
 };
 
 #endif

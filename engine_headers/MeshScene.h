@@ -6,30 +6,36 @@
 #include<assimp/postprocess.h>
 
 #include"GameObject.h"
+#include"CollisionMesh.h"
 
 class MeshScene
 {
 	public:
 
-		std::vector<Mesh> sceneMeshes;
+		std::vector<std::vector<Mesh>> lodMeshes;// sceneMeshes;
 		std::vector<Material*> sceneMaterials;
 
+		std::vector<CollisionMesh> sceneCollisionMeshes;
+
 		Transform transform;
-		const char* filename;
 		Shader shader;
 		Material* material;
 
-		MeshScene(Transform transform, const char* filename, Shader& shader, Material* material);
-		void ImportMeshes();
+		MeshScene(Transform transform, Behavior* behavior, std::vector<const char*> lodFilenames, Shader& shader, Material* material);
+		void ImportMeshes(const char* filename, unsigned int activeLod);
 		void Clear();
-		//void InstantiateGameObjects();
+
+		//static std::vector<CollisionMesh> ImportCollisionMesh(const char* filename);
+		//void ImportCollisionMeshes();
 
 	private:
-		std::vector<GameObject*> sceneGameObjects;
+		GameObject* sceneGameObject;
 
-		void InitializeMesh(unsigned int index, const aiMesh* mesh, Material* material);
+		void InitializeMesh(unsigned int activeLod, const aiMesh* mesh, Material* material);
 		void InitializeMaterials(const aiScene* scene, const std::string& filename);
 		Texture* InitializeTexture(const aiMaterial* mat, aiTextureType type, std::string dir);
+
+		//void InitializeCollisionMesh(const aiMesh* mesh);
 
 };
 

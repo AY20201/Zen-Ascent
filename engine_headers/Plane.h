@@ -6,9 +6,9 @@
 class Plane
 {
 public:
-	float size;
-	int resolution;
-	float textureScale;
+	float size = 1.0f;
+	int resolution = 1;
+	float textureScale = 1.0f;
 
 	Mesh mesh;
 
@@ -17,9 +17,8 @@ public:
 	std::vector<glm::vec2> uvs;
 
 	Plane(float size, int resolution, float textureScale, Material* mat);
+	Plane() = default;
 	//bool MeshInitialized();
 };
 
 #endif
-
-//correct file location
