@@ -12,14 +12,12 @@ MeshScene::MeshScene(Transform transform, Behavior* behavior, std::vector<const 
 		ImportMeshes(lodFilenames[i], i);
 	}
 
-	/*
 	for (unsigned int i = 0; i < lodMeshes[lodMeshes.size() - 1].size(); i++)
 	{
 		Mesh sceneMesh = lodMeshes[lodMeshes.size() - 1][i];
 		CollisionMesh newColMesh(sceneMesh.vertices, sceneMesh.indices, transform.matrix, sceneGameObject);
 		sceneCollisionMeshes.push_back(newColMesh);
 	}
-	*/
 
 	GameObject* instantiatedGO = new GameObject(transform.position, transform.rotation, transform.scale, lodMeshes[0], behavior);
 	sceneGameObject = instantiatedGO;

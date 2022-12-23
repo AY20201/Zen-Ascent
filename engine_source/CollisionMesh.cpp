@@ -12,9 +12,9 @@ CollisionMesh::CollisionMesh(std::vector<Vertex>& vertices, std::vector<GLuint>&
 		{
 			Vertex v = vertices[i];
 
-			CollisionMesh::vertices[i].position = glm::vec3(glm::vec4(v.position.x, v.position.y, v.position.z, 1.0f) * transformMatrix);
+			CollisionMesh::vertices[i].position = glm::vec3(transformMatrix * glm::vec4(v.position.x, v.position.y, v.position.z, 1.0f));
 			CollisionMesh::vertices[i].texcoord = glm::vec2(v.texcoord.x, v.texcoord.y);
-			CollisionMesh::vertices[i].normal = glm::vec3(v.normal.x, v.normal.y, v.normal.z) * glm::mat3(glm::transpose(glm::inverse(transformMatrix)));
+			CollisionMesh::vertices[i].normal = glm::mat3(glm::transpose(glm::inverse(transformMatrix))) * glm::vec3(v.normal.x, v.normal.y, v.normal.z);
 			CollisionMesh::vertices[i].tangent = glm::vec3(v.tangent.x, v.tangent.y, v.tangent.z);
 		}
 	}
@@ -22,7 +22,8 @@ CollisionMesh::CollisionMesh(std::vector<Vertex>& vertices, std::vector<GLuint>&
 	CollisionMesh::indices = indices;
 	CollisionMesh::connectObject = connectedGO;
 
-	boxCollider.RecalculateAABB(vertices, transformMatrix);
+	boxCollider = AABB(vertices, transformMatrix);
+	//boxCollider.RecalculateAABB(vertices, transformMatrix);
 
 	CollisionSolver::Instance.sceneCollisionMeshes.push_back(*this);
 }

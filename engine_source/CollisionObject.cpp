@@ -21,11 +21,7 @@ CollisionObject::CollisionObject(glm::vec3 boxDimensions, glm::vec3 position, gl
 	CollisionObject::position = position;
 	CollisionObject::velocity = velocity;
 
-	boxCollider.extentsMin = position - boxDimensions / 2.0f;
-	boxCollider.extentsMax = position + boxDimensions / 2.0f;
-	glm::mat4 startMatrix = glm::translate(glm::mat4(0.0f), position);
-
-	boxCollider.TransformExtents(startMatrix);
+	boxCollider = AABB(position - boxDimensions / 2.0f, position + boxDimensions / 2.0f, glm::mat4(1.0f));
 }
 
 void CollisionObject::UpdateCollisionPacket(glm::vec3 r3Pos, glm::vec3 r3Vel)
@@ -41,6 +37,40 @@ void CollisionObject::UpdateCollisionPacket(glm::vec3 r3Pos, glm::vec3 r3Vel)
 	//std::cout << packet->velocity.x << " " << packet->velocity.y << " " << packet->velocity.z << " " << std::endl;
 }
 
+glm::vec3 CollisionObject::CollideWithWorld(glm::vec3 currentVelocity, float movementSpeed, float deltaTime, glm::vec3 gravity, AABB& lastCollision)
+{
+	glm::vec3 newVelocityVector = currentVelocity;
+
+	if (collisionRecursionDepth > maxRecursionDepth)
+	{
+		return currentVelocity;
+	}
+
+	collisionRecursionDepth += 1;
+
+	for (unsigned int i = 0; i < CollisionSolver::Instance.sceneCollisionMeshes.size(); i++)
+	{
+		AABB aabb = CollisionSolver::Instance.sceneCollisionMeshes[i].boxCollider;
+
+		if (lastCollision.extentsMax != aabb.extentsMax && lastCollision.extentsMin != aabb.extentsMin)
+		{
+			if (boxCollider.CollideWithAABB(aabb))
+			{
+				newVelocityVector = boxCollider.GetNewVelocity(aabb, currentVelocity, gravity);
+
+				glm::vec3 newPosition = position + newVelocityVector * movementSpeed * deltaTime;
+
+				boxCollider.TransformExtents(glm::translate(glm::mat4(1.0f), newPosition));
+
+				return CollideWithWorld(newVelocityVector, movementSpeed, deltaTime, gravity, aabb);
+			}
+		}
+	}
+
+	return currentVelocity;
+}
+
+/*
 void CollisionObject::CollideAndSlide(glm::vec3 r3Vel, glm::vec3 gravity, float movementSpeed, float deltaTime)
 {
 	packet->r3Position = position;
@@ -63,7 +93,7 @@ void CollisionObject::CollideAndSlide(glm::vec3 r3Vel, glm::vec3 gravity, float 
 	collisionRecursionDepth = 0;
 	firstPlane = CollisionPlane(glm::vec3(0.0f), glm::vec3(0.0f));
 	finalPosition = CollideWithWorld(finalPosition, eSpaceVelocity, firstPlane);
-	*/
+	
 	finalPosition = finalPosition * colliderRadius;
 
 	glm::vec3 collisionMovement = finalPosition - position;
@@ -76,6 +106,7 @@ void CollisionObject::CollideAndSlide(glm::vec3 r3Vel, glm::vec3 gravity, float 
 	velocity = combinedVelocity * glm::vec3(movementSpeed, 1.0f, movementSpeed);
 	position = position + velocity * deltaTime;
 }
+*/
 /*
 //original recursive
 glm::vec3 CollisionObject::CollideWithWorld(glm::vec3 ePos, glm::vec3 eVel, CollisionPlane lastPlane)
@@ -135,6 +166,7 @@ glm::vec3 CollisionObject::CollideWithWorld(glm::vec3 ePos, glm::vec3 eVel, Coll
 }
 */
 //revised recursive
+/*
 glm::vec3 CollisionObject::CollideWithWorld(glm::vec3 ePos, glm::vec3 eVel, CollisionPlane lastPlane)
 {
 	float closeDistance = 0.001f;
@@ -191,6 +223,7 @@ glm::vec3 CollisionObject::CollideWithWorld(glm::vec3 ePos, glm::vec3 eVel, Coll
 	collisionRecursionDepth++;
 	return CollideWithWorld(nearPoint, newVelocityVector, lastPlane);
 }
+*/
 
 /*
 glm::vec3 CollisionObject::CollideWithWorld(glm::vec3 ePos, glm::vec3 eVel)

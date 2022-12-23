@@ -1,7 +1,7 @@
 #include"../game_headers/PlayerController.h"
 
 PlayerController::PlayerController(float movementSpeed, float height, Camera* camera, glm::vec3 boxDimensions) 
-	: CollisionObject(boxDimensions, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f))
+	: CollisionObject(boxDimensions, glm::vec3(0.0f, boxDimensions.y / 2.0f, 0.0f), glm::vec3(0.0f))
 {
 	PlayerController::movementSpeed = movementSpeed;
 	PlayerController::height = height;
@@ -42,12 +42,69 @@ void PlayerController::Update(float deltaTime, GLFWwindow* window)
 			movementVec = glm::normalize(movementVec);
 		}
 
-		position = parentObj->transform.position + glm::vec3(0.0f, height / 2.0f, 0.0f);
-		velocity = movementVec;
+		position = parentObj->transform.position;
+		velocity = movementVec + gravity;
 
-		CollideAndSlide(velocity, glm::vec3(0.0f, -1.0f, 0.0f), movementSpeed, deltaTime);
+		glm::vec3 newPosition = position + velocity * movementSpeed * deltaTime;
 
-		parentObj->transform.position = position + glm::vec3(0.0f, -(height / 2.0f), 0.0f);
+		glm::vec3 origExMin = boxCollider.extentsMin;
+		glm::vec3 origExMax = boxCollider.extentsMax;
+
+		boxCollider.TransformExtents(glm::translate(newPosition));
+
+		//orthogonal vectors
+		glm::vec3 ux = glm::vec3(1.0f, 0.0f, 0.0f);
+		glm::vec3 uy = glm::vec3(0.0f, 1.0f, 0.0f);
+		glm::vec3 uz = glm::vec3(0.0f, 0.0f, 1.0f);
+
+		glm::vec3 newVelocityVector = velocity;
+
+		AABB zeroAABB = AABB(glm::vec3(0.0f), glm::vec3(0.0f), glm::mat4(0.0f));
+
+		collisionRecursionDepth = 0;
+		newVelocityVector = CollideWithWorld(newVelocityVector, movementSpeed, deltaTime, gravity, zeroAABB);
+		/*
+		for (unsigned int i = 0; i < CollisionSolver::Instance.sceneCollisionMeshes.size(); i++)
+		{
+			AABB aabb = CollisionSolver::Instance.sceneCollisionMeshes[i].boxCollider;
+
+			if (boxCollider.CollideWithAABB(aabb))
+			{
+				newVelocityVector = boxCollider.GetNewVelocity(aabb, velocity, gravity);
+
+				newPosition = position + newVelocityVector * movementSpeed * deltaTime;
+
+				boxCollider.TransformExtents(glm::translate(newPosition));
+
+				for (unsigned int j = 0; j < CollisionSolver::Instance.sceneCollisionMeshes.size(); j++)
+				{
+					AABB aabb2 = CollisionSolver::Instance.sceneCollisionMeshes[j].boxCollider;
+
+					if (aabb2.extentsMax != aabb.extentsMax && aabb2.extentsMin != aabb.extentsMin)
+					{
+						if (boxCollider.CollideWithAABB(aabb2))
+						{
+							newVelocityVector = boxCollider.GetNewVelocity(aabb2, newVelocityVector, gravity);
+
+							break;
+						}
+					}
+				}
+				
+				break;
+			
+			}
+			
+		}
+		*/
+
+		velocity = newVelocityVector;
+		position = position + newVelocityVector * movementSpeed * deltaTime;
+
+		boxCollider.extentsMin = origExMin;
+		boxCollider.extentsMax = origExMax;
+
+		parentObj->transform.position = position;
 		camera->Position = parentObj->transform.position + glm::vec3(0.0f, height, 0.0f);
 
 		ray.origin = camera->Position;
@@ -76,4 +133,5 @@ void PlayerController::Update(float deltaTime, GLFWwindow* window)
 	}
 	
 	parentObj->transform.RecalculateMatrix();
+	boxCollider.TransformExtents(parentObj->transform.matrix); 
 }

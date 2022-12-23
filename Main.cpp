@@ -176,7 +176,7 @@ int main()
 
 	GameObject smallPyramid(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), pyramid, nullptr);
 	GameObject planeObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), plane.mesh, nullptr);
-	PlayerController* playerController = new PlayerController(2.0f, 0.6f, &camera, glm::vec3(0.3f, 0.3f, 0.3f));
+	PlayerController* playerController = new PlayerController(2.0f, 0.6f, &camera, glm::vec3(0.4f, 0.6f, 0.4f));
 	GameObject player(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), Mesh(), playerController);
 	
 	CollisionMesh pyramidCollider(verts, ind, smallPyramid.transform.matrix, &smallPyramid);
