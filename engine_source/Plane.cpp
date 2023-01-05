@@ -50,7 +50,7 @@ Plane::Plane(float size, int resolution, float textureScale, Material* mat)
 		verticesFull.push_back(Vertex{ vertices[i], uvs[i], glm::vec3(0.0f, 1.0f, 0.0f) });
 	}
 
-	mesh = Mesh(verticesFull, indices, mat, false);
+	mesh = Mesh(verticesFull, indices, mat, false, true, true);
 }
 
 //correct file location

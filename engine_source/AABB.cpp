@@ -16,6 +16,16 @@ AABB::AABB(glm::vec3 min, glm::vec3 max, glm::mat4 transformMatrix)
 	TransformExtents(transformMatrix);
 }
 
+Capsule::Capsule(glm::vec3 top, glm::vec3 bottom, float radius)
+{
+	Capsule::top = top;
+	Capsule::bottom = bottom;
+	Capsule::radius = radius;
+
+	end = glm::vec3(top.x, top.y - radius, top.z);
+	start = glm::vec3(bottom.x, bottom.y + radius, bottom.z);
+}
+
 void AABB::RecalculateAABB(std::vector<Vertex>& vertices, glm::mat4 transformMatrix)
 {
 	if (transformMatrix != lastTransformMatrix)
@@ -74,6 +84,14 @@ void AABB::TransformExtents(glm::mat4 transformMatrix)
 	center = glm::vec3(transformMatrix * glm::vec4(originalCenter, 1.0f));
 }
 
+void Capsule::TransformExtents(glm::mat4 transformMatrix)
+{
+	top = glm::vec3(transformMatrix * glm::vec4(top, 1.0f));
+	bottom = glm::vec3(transformMatrix * glm::vec4(bottom, 1.0f));
+	start = glm::vec3(transformMatrix * glm::vec4(start, 1.0f));
+	end = glm::vec3(transformMatrix * glm::vec4(end, 1.0f));
+}
+
 bool AABB::CollideWithAABB(AABB& aabb)
 {
 	glm::vec3 minA = extentsMin;
@@ -94,8 +112,6 @@ bool AABB::CollideWithAABB(AABB& aabb)
 
 		float signedDist = glm::dot(pn, c) - d;
 
-		std::cout << (fabs(signedDist) <= r) << std::endl;
-
 		return fabs(signedDist) <= r && (
 			minA.x <= maxB.x &&
 			maxA.x >= minB.x &&
@@ -114,9 +130,66 @@ bool AABB::CollideWithAABB(AABB& aabb)
 	);
 }
 
-glm::vec3 AABB::GetNewVelocity(AABB& aabb, glm::vec3 currentVelocity, glm::vec3 gravity)
+bool AABB::CollideWithSphere(glm::vec3 spherePos, float radius)
+{
+	float x = std::max(extentsMin.x, std::min(spherePos.x, extentsMax.x));
+	float y = std::max(extentsMin.y, std::min(spherePos.y, extentsMax.y));
+	float z = std::max(extentsMin.z, std::min(spherePos.z, extentsMax.z));
+
+	float dist = sqrtf(
+		(x - spherePos.x) * (x - spherePos.x) +
+		(y - spherePos.y) * (y - spherePos.y) +
+		(z - spherePos.z) * (z - spherePos.z)
+	);
+
+	return dist < radius;
+}
+
+bool AABB::CollideWithCapsule(AABB& encapsulatingAABB, Capsule& capsule)
+{
+	if (!CollideWithAABB(encapsulatingAABB)) 
+	{
+		return false;
+	}
+
+	glm::vec3 ux = glm::vec3(1.0f, 0.0f, 0.0f);
+	glm::vec3 uy = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 uz = glm::vec3(0.0f, 0.0f, 1.0f);
+
+	glm::vec3 e = encapsulatingAABB.extentsMax - encapsulatingAABB.center;
+
+	glm::vec3 d = center - encapsulatingAABB.center;
+
+	float dx = glm::dot(d, ux);
+	float dy = glm::dot(d, uy);
+	float dz = glm::dot(d, uz);
+
+	if (dx > e.x) dx = e.x;
+	if (dx < -e.x) dx = -e.x;
+
+	if (dy > e.y) dy = e.y;
+	if (dy < -e.y) dy = -e.y;
+
+	if (dz > e.z) dz = e.z;
+	if (dz < -e.z) dz = -e.z;
+
+	glm::vec3 collisionPoint = encapsulatingAABB.center + dx * ux + dy * uy + dz * uz;
+
+	glm::vec3 AB = capsule.end - capsule.start;
+	glm::vec3 AP = collisionPoint - capsule.start;
+	float lengthSqrAB = AB.x * AB.x + AB.y * AB.y + AB.z * AB.z;
+	float t = (AP.x * AB.x + AP.y * AB.y + AP.z * AB.z) / lengthSqrAB;
+	if (t < 0.0f) t = 0.0f;
+	if (t > 1.0f) t = 1.0f;
+	glm::vec3 closestPoint = capsule.start + t * AB;
+
+	return CollideWithSphere(closestPoint, capsule.radius);
+}
+
+glm::vec3 AABB::GetNewVelocity(AABB& aabb, glm::vec3 currentVelocity, glm::vec3 vmv)
 {
 	/*
+	//vmv = verticalMovementVector (increases by gravity)
 	glm::vec3 ux = glm::vec3(1.0f, 0.0f, 0.0f);
 	glm::vec3 uy = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::vec3 uz = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -129,10 +202,6 @@ glm::vec3 AABB::GetNewVelocity(AABB& aabb, glm::vec3 currentVelocity, glm::vec3 
 	float dx = glm::dot(d, ux);
 	float dy = glm::dot(d, uy);
 	float dz = glm::dot(d, uz);
-
-	//float adx = fabs(dx);
-	//float ady = fabs(dy);
-	//float adz = fabs(dz);
 
 	if (dx > e.x) dx = e.x;
 	if (dx < -e.x) dx = -e.x;
@@ -151,22 +220,25 @@ glm::vec3 AABB::GetNewVelocity(AABB& aabb, glm::vec3 currentVelocity, glm::vec3 
 	{
 		collisionNormal = glm::normalize(collisionNormal);
 	}
-
-	collisionNormal = glm::vec3(roundf(collisionNormal.x), roundf(collisionNormal.y), roundf(collisionNormal.z));
 	*/
-	
+
 	glm::vec3 collisionNormal = GetCollisionNormal(aabb);
+
+	if (glm::dot(collisionNormal, currentVelocity) > 0.0f)
+	{
+		return currentVelocity;
+	}
 
 	if (collisionNormal.y == 0.0f)
 	{
 		glm::vec3 perpendicularVec = glm::vec3(collisionNormal.z, 0.0f, -collisionNormal.x);
-		float scalar = glm::dot(perpendicularVec, currentVelocity - gravity);
+		float scalar = glm::dot(perpendicularVec, currentVelocity - vmv);
 
-		return (perpendicularVec * scalar) + gravity;
+		return (perpendicularVec * scalar) + vmv;
 	}
 	else
 	{
-		return currentVelocity - gravity;
+		return currentVelocity - vmv;
 	}
 	
 }

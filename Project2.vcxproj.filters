@@ -309,5 +309,11 @@
     <None Include="engine_resource\Shaders\gbuffer.frag">
       <Filter>Resource Files\engine_resource\Shaders</Filter>
     </None>
+    <None Include="engine_resource\Shaders\glass.vert">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\glass.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -107,6 +107,7 @@ int main()
 	FrameBufferObject shadowMapFrameBuffer(2048, 2048, 1, 1);
 	FrameBufferObject gBufferFrameBuffer(width, height, 3, 1);
 	FrameBufferObject basePostFrameBuffer(width, height, 2, 1);
+	FrameBufferObject finalPassFrameBuffer(width, height, 1, 1);
 	basePostFrameBuffer.InitializeRenderQuad();
 
 	BloomRenderer bloomRenderer(width, height, 7);
@@ -128,6 +129,7 @@ int main()
 	
 	//ObjectHandler objectHandler;
 	Shader shaderProgram("engine_resource/Shaders/default.vert", "engine_resource/Shaders/default.frag");
+	Shader glassShaderProgram("engine_resource/Shaders/glass.vert", "engine_resource/Shaders/glass.frag");
 	Shader skyBoxShaderProgram("engine_resource/Shaders/skybox.vert", "engine_resource/Shaders/skybox.frag");
 	Shader shadowShaderProgram("engine_resource/Shaders/depth.vert", "engine_resource/Shaders/depth.frag");
 	Shader basePostShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/basepostprocesser.frag");
@@ -150,9 +152,14 @@ int main()
 	PointLight light2(glm::vec3(-0.8f, 1.0f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
 	PointLight light3(glm::vec3(0.8f, 1.0f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
 
+	PointLight light4(glm::vec3(5.8f, 1.8f, 2.4f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+	PointLight light5(glm::vec3(9.4f, 3.3f, 5.8f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+	PointLight light6(glm::vec3(7.3f, 4.5f, 9.4f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+
 	DirectionalLight globalDirectionalLight(glm::vec3(0.6f, -0.5f, -0.5f), glm::vec3(1.0f, 0.98f, 0.94f), 1.25f);
 
-	Material* material = new Material(shaderProgram, TexParam{ "albedo", brickTexture, 1.0 }, TexParam{"normalMap", normalMap, 1.0}/*TexParam{"specMap", marbleSpecMap, 1.0}*/);
+	Material* material = new Material(shaderProgram, TexParam{ "albedo", brickTexture, 1.0f }, TexParam{"normalMap", normalMap, 1.0f }/*TexParam{"specMap", marbleSpecMap, 1.0}*/, false);
+	Material* glass = new Material(glassShaderProgram, TexParam{ "", nullptr, 1.0f }, TexParam{ "", nullptr, 1.0f }, true);
 
 	//Material* waterMaterial = new Material(waterShader, nullptr, nullptr);
 
@@ -165,19 +172,34 @@ int main()
 		"engine_resource/Textures/cloud_skybox/clouds1_south.bmp"}, //back
 		skyBoxShaderProgram);
 
-	Mesh pyramid(verts, ind, material, false);
-	Plane plane(20.0f, 10, 1.0f, material);
+	/*
+	Skybox sceneSkyBox(std::vector<const char*>{
+		"engine_resource/Textures/sunset_skybox/sunsetflat_rt.jpg", //right
+		"engine_resource/Textures/sunset_skybox/sunsetflat_lf.jpg", //left
+		"engine_resource/Textures/sunset_skybox/sunsetflat_up.jpg", //up
+		"engine_resource/Textures/sunset_skybox/sunsetflat_dn.jpg", //down
+		"engine_resource/Textures/sunset_skybox/sunsetflat_ft.jpg", //front
+		"engine_resource/Textures/sunset_skybox/sunsetflat_bk.jpg"}, //back
+		skyBoxShaderProgram);
+	*/
+
+	Mesh pyramid(verts, ind, material, false, true, true);
+	Plane plane(10.0f, 10, 1.0f, material);
 
 	Transform defaultTransform(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 	
 	//MeshScene importedCube(Transform(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0f), glm::vec3(0.25f)), "engine_resource/3D Objects/cube/cube.obj", shaderProgram, nullptr);
 	MeshScene importedMonkey(Transform(glm::vec3(-1.0f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec3(0.35f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/textured_monkey/monkey.obj", "engine_resource/3D Objects/textured_monkey/monkey_lod_1.obj" }, shaderProgram, nullptr);
 	MeshScene importedDonut(Transform(glm::vec3(-2.5f, 0.25f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/colored_donut/colored_donut.obj", "engine_resource/3D Objects/colored_donut/colored_donut_lod_1.obj" }, shaderProgram, nullptr);
+	
+	MeshScene walls(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/walls/walls.obj" }, glassShaderProgram, glass);
+	MeshScene floor1(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor1/floor1.obj" }, shaderProgram, nullptr);
+	MeshScene floor2(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor2/floor2.obj" }, shaderProgram, nullptr);
 
 	GameObject smallPyramid(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), pyramid, nullptr);
 	GameObject planeObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), plane.mesh, nullptr);
-	PlayerController* playerController = new PlayerController(2.0f, 0.6f, &camera, glm::vec3(0.4f, 0.6f, 0.4f));
-	GameObject player(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), Mesh(), playerController);
+	PlayerController* playerController = new PlayerController(2.0f, 0.6f, &camera, glm::vec3(0.4f, 0.7f, 0.4f));
+	GameObject player(glm::vec3(1.0f, 2.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f), Mesh(), playerController);
 	
 	CollisionMesh pyramidCollider(verts, ind, smallPyramid.transform.matrix, &smallPyramid);
 	CollisionMesh planeCollider(plane.mesh.vertices, plane.mesh.indices, planeObject.transform.matrix, &planeObject);
@@ -214,12 +236,15 @@ int main()
 		//camera.FlyController(window);
 		camera.UpdateMatrix(45.0f, nearClipPlane, farClipPlane);
 		camera.SetMatrix(shaderProgram, "camMatrix");
+		camera.SetMatrix(glassShaderProgram, "camMatrix");
 		//camera.SetMatrix(waterShader, "camMatrix");
 		skyBoxShaderProgram.Activate();
 		glUniformMatrix4fv(glGetUniformLocation(skyBoxShaderProgram.ID, "camMatrix"), 1, GL_FALSE, glm::value_ptr(camera.projection * glm::mat4(glm::mat3(camera.view))));
 
 		shaderProgram.Activate();
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+
+		glm::vec3 camPos = camera.Position;
+		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camPos.x, camPos.y, camPos.z);
 
 		glUniform1i(glGetUniformLocation(shaderProgram.ID, "skybox"), sceneSkyBox.texUnit);
 		sceneSkyBox.Bind();
@@ -236,6 +261,7 @@ int main()
 
 		ObjectHandler::Instance.Update(deltaTime, window);
 
+		/*
 		//geometry buffer for ssao
 		gBufferFrameBuffer.BindFrameBuffer();
 		gbufferShaderProgram.Activate();
@@ -244,17 +270,18 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		ObjectHandler::Instance.DrawMeshes(gbufferShaderProgram);
 		gBufferFrameBuffer.UnbindFrameBuffer();
+		*/
 
 		//shadow mapping
 		glCullFace(GL_FRONT);
 		shadowMapFrameBuffer.BindFrameBuffer();
 		glClear(GL_DEPTH_BUFFER_BIT);
-		ObjectHandler::Instance.DrawMeshes(shadowShaderProgram);
+		ObjectHandler::Instance.DrawMeshes(shadowShaderProgram, false);
 		shadowMapFrameBuffer.UnbindFrameBuffer();
 		glCullFace(GL_BACK);
-
+		//
 		glViewport(0, 0, width, height);
-
+		//
 		basePostFrameBuffer.BindFrameBuffer();
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -262,23 +289,34 @@ int main()
 		shadowMapFrameBuffer.SetTexture(shadowMapFrameBuffer.depthTextures[0], shaderProgram, "shadowMap");
 		jitterComputeShader.SetTexture(shaderProgram, "jitterMap");
 
-		ObjectHandler::Instance.DrawMeshes();
+		ObjectHandler::Instance.DrawMeshes(false);
 		sceneSkyBox.Draw();
 		basePostFrameBuffer.UnbindFrameBuffer();
-
-		//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-		//glClear(GL_COLOR_BUFFER_BIT);
-
-		bloomRenderer.RenderBloomTexture(bloomUpsampleShaderProgram, bloomDownsampleShaderProgram, basePostFrameBuffer.colorTextures[0].textureID, basePostFrameBuffer.colorTextures[0].textureUnit, 0.005f);
+		//
+		//transparent object rendering
+		finalPassFrameBuffer.BindFrameBuffer();
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-		//tonemapperFrameBuffer.BindFrameBuffer();
+		glassShaderProgram.Activate();
+		glUniform3f(glGetUniformLocation(glassShaderProgram.ID, "camPos"), camPos.x, camPos.y, camPos.z);
+		glUniform1i(glGetUniformLocation(glassShaderProgram.ID, "skybox"), sceneSkyBox.texUnit);
+		sceneSkyBox.Bind();
+		basePostFrameBuffer.SetTexture(basePostFrameBuffer.colorTextures[0], glassShaderProgram, "colorSampler");
+
+		ObjectHandler::Instance.DrawMeshes(true);
+		sceneSkyBox.Draw();
+
+		finalPassFrameBuffer.UnbindFrameBuffer();
+		//
+
+		bloomRenderer.RenderBloomTexture(bloomUpsampleShaderProgram, bloomDownsampleShaderProgram, finalPassFrameBuffer.colorTextures[0].textureID, finalPassFrameBuffer.colorTextures[0].textureUnit, 0.005f);
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		tonemapperShaderProgram.Activate();
 
-		glUniform1i(glGetUniformLocation(tonemapperShaderProgram.ID, "renderedScene"), basePostFrameBuffer.colorTextures[0].textureUnit);
-		glActiveTexture(GL_TEXTURE0 + basePostFrameBuffer.colorTextures[0].textureUnit);
-		glBindTexture(GL_TEXTURE_2D, basePostFrameBuffer.colorTextures[0].textureID);
+		glUniform1i(glGetUniformLocation(tonemapperShaderProgram.ID, "renderedScene"), finalPassFrameBuffer.colorTextures[0].textureUnit);
+		glActiveTexture(GL_TEXTURE0 + finalPassFrameBuffer.colorTextures[0].textureUnit);
+		glBindTexture(GL_TEXTURE_2D, finalPassFrameBuffer.colorTextures[0].textureID);
 
 		glUniform1i(glGetUniformLocation(tonemapperShaderProgram.ID, "bloomBlur"), bloomRenderer.mipTexUnit);
 		glActiveTexture(GL_TEXTURE0 + bloomRenderer.mipTexUnit);

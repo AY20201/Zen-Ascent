@@ -28,6 +28,7 @@ CollisionMesh::CollisionMesh(std::vector<Vertex>& vertices, std::vector<GLuint>&
 	CollisionSolver::Instance.sceneCollisionMeshes.push_back(*this);
 }
 
+/*
 void CollisionMesh::CheckAllTriangles(CollisionObject* collisionObject)
 {
 	for (unsigned int i = 0; i < indices.size(); i += 3)
@@ -39,6 +40,7 @@ void CollisionMesh::CheckAllTriangles(CollisionObject* collisionObject)
 		collisionObject->packet->CheckTriangleCollision(v0.position, v1.position, v2.position);
 	}
 }
+*/
 
 void CollisionMesh::CheckRaycast(Raycast& ray)
 {

@@ -22,8 +22,10 @@ CollisionObject::CollisionObject(glm::vec3 boxDimensions, glm::vec3 position, gl
 	CollisionObject::velocity = velocity;
 
 	boxCollider = AABB(position - boxDimensions / 2.0f, position + boxDimensions / 2.0f, glm::mat4(1.0f));
+	capsuleCollider = Capsule(position + glm::vec3(0.0f, boxDimensions.y / 2.0f, 0.0f), position - glm::vec3(0.0f, boxDimensions.y / 2.0f, 0.0f), boxDimensions.x / 2.0f);
 }
 
+/*
 void CollisionObject::UpdateCollisionPacket(glm::vec3 r3Pos, glm::vec3 r3Vel)
 {
 	packet->r3Position = r3Pos;
@@ -36,9 +38,11 @@ void CollisionObject::UpdateCollisionPacket(glm::vec3 r3Pos, glm::vec3 r3Vel)
 	//packet->CheckTriangleCollision(glm::vec3(0.5f, 0.0f, -0.5f), glm::vec3(0.0f, 0.8f, 0.0f), glm::vec3(0.5f, 0.0f, 0.5f));
 	//std::cout << packet->velocity.x << " " << packet->velocity.y << " " << packet->velocity.z << " " << std::endl;
 }
+*/
 
-glm::vec3 CollisionObject::CollideWithWorld(glm::vec3 currentVelocity, float movementSpeed, float deltaTime, glm::vec3 gravity, AABB& lastCollision)
+glm::vec3 CollisionObject::CollideWithWorld(glm::vec3 currentVelocity, float movementSpeed, float deltaTime, glm::vec3 vmv, AABB& lastCollision)
 {
+	//vmv = verticalMovementVector
 	glm::vec3 newVelocityVector = currentVelocity;
 
 	if (collisionRecursionDepth > maxRecursionDepth)
@@ -56,13 +60,14 @@ glm::vec3 CollisionObject::CollideWithWorld(glm::vec3 currentVelocity, float mov
 		{
 			if (boxCollider.CollideWithAABB(aabb))
 			{
-				newVelocityVector = boxCollider.GetNewVelocity(aabb, currentVelocity, gravity);
+				newVelocityVector = boxCollider.GetNewVelocity(aabb, currentVelocity, vmv);
 
 				glm::vec3 newPosition = position + newVelocityVector * movementSpeed * deltaTime;
 
 				boxCollider.TransformExtents(glm::translate(glm::mat4(1.0f), newPosition));
+				capsuleCollider.TransformExtents(glm::translate(glm::mat4(1.0f), newPosition));
 
-				return CollideWithWorld(newVelocityVector, movementSpeed, deltaTime, gravity, aabb);
+				return CollideWithWorld(newVelocityVector, movementSpeed, deltaTime, vmv, aabb);
 			}
 		}
 	}

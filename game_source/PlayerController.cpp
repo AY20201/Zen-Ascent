@@ -19,6 +19,8 @@ void PlayerController::Awake()
 	
 	ray.origin = camera->Position;
 	ray.direction = camera->Orientation;
+
+	initialJumpVelocity = glm::vec3(0.0f, sqrtf(2 * -gravity.y * jumpHeight), 0.0f);
 }
 
 void PlayerController::Update(float deltaTime, GLFWwindow* window)
@@ -43,14 +45,22 @@ void PlayerController::Update(float deltaTime, GLFWwindow* window)
 		}
 
 		position = parentObj->transform.position;
-		velocity = movementVec + gravity;
+
+		verticalMovementVector = verticalMovementVector + gravity * deltaTime;
+		velocity = movementVec + verticalMovementVector;
 
 		glm::vec3 newPosition = position + velocity * movementSpeed * deltaTime;
 
 		glm::vec3 origExMin = boxCollider.extentsMin;
 		glm::vec3 origExMax = boxCollider.extentsMax;
 
+		glm::vec3 origTop = capsuleCollider.top;
+		glm::vec3 origBottom = capsuleCollider.bottom;
+		glm::vec3 origStart = capsuleCollider.start;
+		glm::vec3 origEnd = capsuleCollider.end;
+
 		boxCollider.TransformExtents(glm::translate(newPosition));
+		capsuleCollider.TransformExtents(glm::translate(newPosition));
 
 		//orthogonal vectors
 		glm::vec3 ux = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -62,47 +72,45 @@ void PlayerController::Update(float deltaTime, GLFWwindow* window)
 		AABB zeroAABB = AABB(glm::vec3(0.0f), glm::vec3(0.0f), glm::mat4(0.0f));
 
 		collisionRecursionDepth = 0;
-		newVelocityVector = CollideWithWorld(newVelocityVector, movementSpeed, deltaTime, gravity, zeroAABB);
-		/*
-		for (unsigned int i = 0; i < CollisionSolver::Instance.sceneCollisionMeshes.size(); i++)
+		newVelocityVector = CollideWithWorld(newVelocityVector, movementSpeed, deltaTime, verticalMovementVector, zeroAABB);
+
+		isGrounded = newVelocityVector.y == 0.0f;
+		//"ground check"
+		if (isGrounded)
 		{
-			AABB aabb = CollisionSolver::Instance.sceneCollisionMeshes[i].boxCollider;
-
-			if (boxCollider.CollideWithAABB(aabb))
-			{
-				newVelocityVector = boxCollider.GetNewVelocity(aabb, velocity, gravity);
-
-				newPosition = position + newVelocityVector * movementSpeed * deltaTime;
-
-				boxCollider.TransformExtents(glm::translate(newPosition));
-
-				for (unsigned int j = 0; j < CollisionSolver::Instance.sceneCollisionMeshes.size(); j++)
-				{
-					AABB aabb2 = CollisionSolver::Instance.sceneCollisionMeshes[j].boxCollider;
-
-					if (aabb2.extentsMax != aabb.extentsMax && aabb2.extentsMin != aabb.extentsMin)
-					{
-						if (boxCollider.CollideWithAABB(aabb2))
-						{
-							newVelocityVector = boxCollider.GetNewVelocity(aabb2, newVelocityVector, gravity);
-
-							break;
-						}
-					}
-				}
-				
-				break;
-			
-			}
-			
+			verticalMovementVector = glm::vec3(0.0f);
+			timeLastGrounded = elaspedTime;
 		}
-		*/
+
+		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && timeSinceLastJump > jumpDelay && elaspedTime - timeLastGrounded < coyoteTime) //jump check
+		{
+			verticalMovementVector = initialJumpVelocity;
+			timeSinceLastJump = 0.0f;
+		}
+
+		timeSinceLastJump += deltaTime;
+		elaspedTime += deltaTime;
+
+		//clamp velocity
+		if (verticalMovementVector.y > terminalVelocity.y)
+		{
+			verticalMovementVector = terminalVelocity;
+		}
 
 		velocity = newVelocityVector;
+
+		//damping, only on x and z axis
+		//velocity = velocity / glm::vec3((1.0f + damping * deltaTime), 1.0f, (1.0f + damping * deltaTime));
+
 		position = position + newVelocityVector * movementSpeed * deltaTime;
 
 		boxCollider.extentsMin = origExMin;
 		boxCollider.extentsMax = origExMax;
+
+		capsuleCollider.top = origTop;
+		capsuleCollider.bottom = origBottom;
+		capsuleCollider.start = origStart;
+		capsuleCollider.end = origEnd;
 
 		parentObj->transform.position = position;
 		camera->Position = parentObj->transform.position + glm::vec3(0.0f, height, 0.0f);

@@ -12,7 +12,6 @@ public:
 
 	std::vector<CollisionMesh> sceneCollisionMeshes;
 
-	void UpdateWorldCollisions(CollisionObject* colObject);
 	void UpdateWorldCollisionsRay(Raycast& ray);
 };
 

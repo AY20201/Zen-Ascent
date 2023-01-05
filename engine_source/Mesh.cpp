@@ -1,14 +1,20 @@
 #include"../engine_headers/Mesh.h"
 
-Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, Material* material, bool tangentsCalculated)
+Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, Material* material, bool tangentsCalculated, bool uvsCalculated, bool shadowCaster)
 {
 	Mesh::vertices = vertices;
 	Mesh::indices = indices;
 	Mesh::material = material;
+	Mesh::shadowCaster = shadowCaster;
 
 	if (!tangentsCalculated)
 	{
 		CalculateTangents();
+	}
+
+	if (!uvsCalculated)
+	{
+		CalculateUVS();
 	}
 	
 	vao.Bind();
@@ -54,6 +60,37 @@ void Mesh::CalculateTangents()
 		v0.tangent += tangent;
 		v1.tangent += tangent;
 		v2.tangent += tangent;
+	}
+}
+
+void Mesh::CalculateUVS()
+{
+	for (unsigned int i = 0; i < vertices.size(); i++)
+	{
+		Vertex& vert = vertices[i];
+		glm::vec3 norm = glm::normalize(vert.normal);
+
+		if (norm == glm::vec3(0.0f, 1.0f, 0.0f) || norm == glm::vec3(0.0f, -1.0f, 0.0f)) //if up/down
+		{
+			glm::vec2 newUV = glm::vec2(vert.position.x, vert.position.z);
+			vertices[i].texcoord = newUV;
+		}
+		else if (norm == glm::vec3(1.0f, 0.0f, 0.0f) //if right
+			|| norm == glm::vec3(-1.0f, 0.0f, 0.0f))
+		{
+			glm::vec2 newUV = glm::vec2(vert.position.y, vert.position.z);
+			vertices[i].texcoord = newUV;
+		}
+		
+		else if (norm == glm::vec3(0.0f, 0.0f, 1.0f)
+			|| norm == glm::vec3(0.0f, 0.0f, -1.0f))
+		{
+			glm::vec2 newUV = glm::vec2(vert.position.x, vert.position.y);
+			vertices[i].texcoord = newUV;
+		}
+			
+
+		
 	}
 }
 

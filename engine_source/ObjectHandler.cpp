@@ -12,25 +12,46 @@ GameObject* ObjectHandler::GetGameObject(int id)
 	return gameObjects[id];
 }
 
-void ObjectHandler::DrawMeshes()
+void ObjectHandler::DrawMeshes(bool ignoreTransparency)
 {
 	for (unsigned int i = 0; i < gameObjects.size(); i++)
 	{
 		for (unsigned int j = 0; j < gameObjects[i]->meshes.size(); j++)
 		{
-			gameObjects[i]->meshes[j].Draw(gameObjects[i]->transform.matrix);
+			if (ignoreTransparency)
+			{
+				gameObjects[i]->meshes[j].Draw(gameObjects[i]->transform.matrix);
+			}
+			else 
+			{
+				if (!gameObjects[i]->meshes[j].material->transparent)
+				{
+					gameObjects[i]->meshes[j].Draw(gameObjects[i]->transform.matrix);
+				}
+			}
+			
 		}
 		//gameObjects[i]->mesh.Draw(gameObjects[i]->transform.matrix);
 	}
 }
 
-void ObjectHandler::DrawMeshes(Shader& shader)
+void ObjectHandler::DrawMeshes(Shader& shader, bool ignoreTransparency)
 {
 	for (unsigned int i = 0; i < gameObjects.size(); i++)
 	{
 		for (unsigned int j = 0; j < gameObjects[i]->meshes.size(); j++)
 		{
-			gameObjects[i]->meshes[j].Draw(gameObjects[i]->transform.matrix, shader);
+			if (ignoreTransparency)
+			{
+				gameObjects[i]->meshes[j].Draw(gameObjects[i]->transform.matrix, shader);
+			}
+			else
+			{
+				if (!gameObjects[i]->meshes[j].material->transparent)
+				{
+					gameObjects[i]->meshes[j].Draw(gameObjects[i]->transform.matrix, shader);
+				}
+			}
 		}
 		//gameObjects[i]->mesh.Draw(gameObjects[i]->transform.matrix, shader);
 	}

@@ -18,15 +18,18 @@ class Mesh
 		std::vector <GLuint> indices;
 		Material* material = new Material();
 
+		bool shadowCaster;
+
 		VAO vao;
 
-		Mesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, Material* material, bool tangentsCalculated);
+		Mesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, Material* material, bool tangentsCalculated, bool uvsCalculated, bool shadowCaster);
 		void Draw(glm::mat4 matrix);
 		void Draw(glm::mat4 matrix, Shader& shader);
 		Mesh() = default;
 
 	private:
 		void CalculateTangents();
+		void CalculateUVS();
 };
 
 #endif

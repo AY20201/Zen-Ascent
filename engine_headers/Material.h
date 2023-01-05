@@ -29,8 +29,9 @@ class Material
 		TexParam albedo;
 		TexParam normalMap;
 		//TexParam specMap;
+		bool transparent;
 
-		Material(Shader& shader, TexParam albedo, TexParam normalMap/*, TexParam specMap*/);
+		Material(Shader& shader, TexParam albedo, TexParam normalMap, bool transparent/*, TexParam specMap*/);
 		Material() = default;
 		void SetTextures();
 		void Clear();

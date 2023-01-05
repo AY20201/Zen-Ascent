@@ -104,6 +104,8 @@
     <None Include="engine_resource\Shaders\fog.frag" />
     <None Include="engine_resource\Shaders\gbuffer.frag" />
     <None Include="engine_resource\Shaders\gbuffer.vert" />
+    <None Include="engine_resource\Shaders\glass.frag" />
+    <None Include="engine_resource\Shaders\glass.vert" />
     <None Include="engine_resource\Shaders\jitter.comp" />
     <None Include="engine_resource\Shaders\terraingen.comp" />
     <None Include="engine_resource\Shaders\tonemapper.frag" />

@@ -15,8 +15,8 @@ class ObjectHandler
 		
 		void AddGameObject(GameObject* gameObject);
 		GameObject* GetGameObject(int id);
-		void DrawMeshes();
-		void DrawMeshes(Shader& shader);
+		void DrawMeshes(bool ignoreTransparency);
+		void DrawMeshes(Shader& shader, bool ignoreTransparency);
 		void Awake();
 		void Update(float deltaTime, GLFWwindow* window);
 		void Delete();

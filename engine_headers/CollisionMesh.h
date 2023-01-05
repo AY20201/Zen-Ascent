@@ -18,7 +18,6 @@ public:
 	GameObject* connectObject;
 
 	CollisionMesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, glm::mat4 transformMatrix, GameObject* connectedGO);
-	void CheckAllTriangles(CollisionObject* collisionObject);
 	void CheckRaycast(Raycast& ray);
 };
 

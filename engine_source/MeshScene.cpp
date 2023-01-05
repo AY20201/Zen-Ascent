@@ -118,7 +118,7 @@ void MeshScene::InitializeMesh(unsigned int activeLod, const aiMesh* mesh, Mater
 		indices.push_back(face.mIndices[2]);
 	}
 
-	Mesh newMesh(vertices, indices, material, true);
+	Mesh newMesh(vertices, indices, material, true, false, true);
 	lodMeshes[activeLod].push_back(newMesh);
 }
 /*
@@ -168,7 +168,7 @@ void MeshScene::InitializeMaterials(const aiScene* scene, const std::string& fil
 		aiColor3D diffuseColor(1.0, 1.0, 1.0);
 		aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor);
 
-		Material* newMaterial = new Material(shader, TexParam{ "albedo", albedo, 1.0, glm::vec3(diffuseColor.r, diffuseColor.g, diffuseColor.b) }, TexParam{ "normalMap", normalMap, 1.0 }/*, TexParam{"specMap", specularMap, 1.0}*/);
+		Material* newMaterial = new Material(shader, TexParam{ "albedo", albedo, 1.0, glm::vec3(diffuseColor.r, diffuseColor.g, diffuseColor.b) }, TexParam{ "normalMap", normalMap, 1.0 }/*, TexParam{"specMap", specularMap, 1.0}*/, false);
 		sceneMaterials.push_back(newMaterial);
 	}
 }

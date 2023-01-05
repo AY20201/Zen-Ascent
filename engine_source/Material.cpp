@@ -1,11 +1,13 @@
 #include"../engine_headers/Material.h"
 
-Material::Material(Shader& shader, TexParam albedo, TexParam normalMap/*, TexParam specMap*/)
+Material::Material(Shader& shader, TexParam albedo, TexParam normalMap, bool transparent/*, TexParam specMap*/)
 {
 	Material::shader = shader;
 	
 	Material::albedo = albedo;
 	Material::normalMap = normalMap;
+
+	Material::transparent = transparent;
 	//Material::specMap = specMap;
 }
 

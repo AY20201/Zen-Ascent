@@ -17,6 +17,24 @@ public:
 	Camera* camera;
 	bool escaped = false;
 
+	glm::vec3 gravity = glm::vec3(0.0f, -6.0f, 0.0f);
+	glm::vec3 verticalMovementVector = glm::vec3(0.0f);
+	glm::vec3 terminalVelocity = glm::vec3(0.0f, 4.0f, 0.0f);
+
+	float jumpHeight = 0.25f;
+	bool isGrounded = false;
+
+	float jumpDelay = 0.5f;
+	float timeSinceLastJump;
+
+	float coyoteTime = 0.2f;
+	float timeLastGrounded;
+	float elaspedTime;
+
+	glm::vec3 initialJumpVelocity;
+
+	float damping = 1.0f;
+
 	Raycast ray;
 	//glm::vec3 startingPosition;
 
