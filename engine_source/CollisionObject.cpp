@@ -71,7 +71,7 @@ glm::vec3 CollisionObject::CollideWithWorld(glm::vec3 currentVelocity, float mov
 			}
 		}
 	}
-
+	
 	return currentVelocity;
 }
 

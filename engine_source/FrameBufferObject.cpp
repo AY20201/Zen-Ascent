@@ -17,7 +17,7 @@ FrameBufferObject::FrameBufferObject(int screenWidth, int screenHeight, int numC
 	{
 		TextureObject colTexObj = TextureObject{};
 		colorTextures.push_back(colTexObj);
-		AttachColorTexture(colorTextures[i], i);
+		AttachColorTexture(colorTextures[i], i, GL_RGBA16F, GL_UNSIGNED_BYTE);
 	}
 
 	if (numColorTex == 0)
@@ -36,6 +36,16 @@ FrameBufferObject::FrameBufferObject(int screenWidth, int screenHeight, int numC
 		glDrawBuffers(3, attachments);
 	}
 	
+
+	UnbindFrameBuffer();
+	UnbindTexture();
+}
+
+FrameBufferObject::FrameBufferObject(int screenWidth, int screenHeight) {
+	FrameBufferObject::screenWidth = screenWidth;
+	FrameBufferObject::screenHeight = screenHeight;
+
+	glGenFramebuffers(1, &bufferID);
 
 	UnbindFrameBuffer();
 	UnbindTexture();
@@ -65,14 +75,14 @@ void FrameBufferObject::AttachDepthTexture(TextureObject& texObj)
 	//glReadBuffer(GL_NONE);
 }
 
-void FrameBufferObject::AttachColorTexture(TextureObject& texObj, GLuint index)
+void FrameBufferObject::AttachColorTexture(TextureObject& texObj, GLuint index, GLenum colorSpace, GLenum pixelType)
 {
 	texObj.textureUnit = Texture::activeTexUnit;
 	Texture::activeTexUnit++;
 
 	glGenTextures(1, &texObj.textureID);
 	glBindTexture(GL_TEXTURE_2D, texObj.textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, screenWidth, screenHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, colorSpace, screenWidth, screenHeight, 0, GL_RGBA, pixelType, NULL);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -85,6 +95,32 @@ void FrameBufferObject::AttachColorTexture(TextureObject& texObj, GLuint index)
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D, texObj.textureID, 0);
 	//glDrawBuffer(GL_NONE);
 	//glReadBuffer(GL_NONE);
+}
+
+void FrameBufferObject::SetUpGBuffer()
+{
+	TextureObject colTexObj = TextureObject{};
+	colorTextures.push_back(colTexObj);
+
+	AttachColorTexture(colorTextures[0], 0, GL_RGBA16F, GL_FLOAT);
+
+	TextureObject colTexObj1 = TextureObject{};
+	colorTextures.push_back(colTexObj1);
+
+	AttachColorTexture(colorTextures[1], 1, GL_RGBA16F, GL_UNSIGNED_BYTE);
+	
+	TextureObject colTexObj2 = TextureObject{};
+	colorTextures.push_back(colTexObj2);
+
+	AttachColorTexture(colorTextures[2], 2, GL_RGBA16F, GL_FLOAT);
+
+	TextureObject colTexObj3 = TextureObject{};
+	colorTextures.push_back(colTexObj3);
+
+	AttachColorTexture(colorTextures[3], 3, GL_RGBA, GL_UNSIGNED_BYTE);
+
+	unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+	glDrawBuffers(4, attachments);
 }
 
 void FrameBufferObject::Delete() {

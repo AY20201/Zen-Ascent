@@ -29,6 +29,7 @@ class FrameBufferObject
 public:
 	FrameBufferObject() = default;
 	FrameBufferObject(int screenWidth, int screenHeight, int numColorTex, int numDepthTex);
+	FrameBufferObject(int screenWidth, int screenHeight);
 	
 	int screenWidth, screenHeight;
 
@@ -42,7 +43,8 @@ public:
 	//TextureObject colorTexture;
 
 	void AttachDepthTexture(TextureObject& texObj);
-	void AttachColorTexture(TextureObject& texObj, GLuint index);
+	void AttachColorTexture(TextureObject& texObj, GLuint index, GLenum colorSpace, GLenum pixelType);
+	void SetUpGBuffer();
 	void BindTexture(TextureObject& texObj);
 	void UnbindTexture();
 	void BindFrameBuffer();

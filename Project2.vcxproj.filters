@@ -303,9 +303,6 @@
     <None Include="engine_resource\Shaders\terraingen.comp">
       <Filter>Resource Files\engine_resource\Shaders</Filter>
     </None>
-    <None Include="engine_resource\Shaders\gbuffer.vert">
-      <Filter>Resource Files\engine_resource\Shaders</Filter>
-    </None>
     <None Include="engine_resource\Shaders\gbuffer.frag">
       <Filter>Resource Files\engine_resource\Shaders</Filter>
     </None>
@@ -313,6 +310,12 @@
       <Filter>Resource Files\engine_resource\Shaders</Filter>
     </None>
     <None Include="engine_resource\Shaders\glass.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\lighting.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\defaultdeferred.frag">
       <Filter>Resource Files\engine_resource\Shaders</Filter>
     </None>
   </ItemGroup>

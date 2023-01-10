@@ -2,10 +2,11 @@
 out vec4 FragColor;
 
 in vec2 texCoord;
-in vec3 normal;
-in vec3 currentPos;
-in vec4 currentPosLightSpace;
-in vec3 tangent;
+
+uniform sampler2D gPosition;
+uniform sampler2D gLightPosition;
+uniform sampler2D gNormal;
+uniform sampler2D gAlbedo;
 
 struct PointLight {
 	vec3 position;
@@ -29,13 +30,6 @@ uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform int numDirLights;
 uniform DirectionalLight dirLights[MAX_DIR_LIGHTS];
 
-uniform sampler2D albedo;
-uniform float albedoScale;
-uniform vec3 albedoColor;
-uniform sampler2D normalMap;
-uniform float normalMapScale;
-uniform sampler2D specMap;
-uniform float specMapScale;
 uniform vec3 camPos;
 
 uniform samplerCube skybox;
@@ -76,7 +70,7 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewD
 	float skyboxBrightness = 0.2126 * skyboxSample.r + 0.7152 * skyboxSample.g + 0.0722 * skyboxSample.b;
 
 	float dist = distance(pos, fragPos);
-	//float falloff = 1.0 / pow(distance(pos, fragPos), 2);
+	
 	float falloff = initAtten / (constantAtten + linearAtten * dist + expAtten * dist * dist);
 
 	return (diffuse + specular * skyboxSample) * iten * falloff * color;
@@ -150,21 +144,16 @@ float CalculateShadow(vec4 fragPosLightSpace, float bias)
 
 void main()
 {
-	vec3 norm = normalize(normal);
+	vec3 currentPos = texture(gPosition, texCoord).rgb;
+	vec3 currentPosLightSpace = texture(gLightPosition, texCoord).rgb;
+	vec3 normal = texture(gNormal, texCoord).rgb;
+	vec3 albedo = texture(gAlbedo, texCoord).rgb;
 
-	vec3 normalMapSample = (texture(normalMap, texCoord * normalMapScale).rgb * 2.0 - 1.0) * normalMapStrength;
-	vec3 tan = normalize(tangent);
-	tan = normalize(tan - dot(tan, norm) * norm);
-	vec3 bitangent = cross(tan, norm);
-	mat3 TBN = mat3(tan, bitangent, norm);
-	norm = normalize(TBN * normalMapSample);
-
-	vec3 specularSample = vec3(specularStrength, specularStrength, specularStrength);//texture(specMap, texCoord * specMapScale).rgb;
+	vec3 specularSample = vec3(specularStrength, specularStrength, specularStrength);
 
 	vec3 viewDir = normalize(camPos - currentPos);
 
 	vec3 adjustedLuminace = vec3(0.2126, 0.7152, 0.0722);
-	//int numMipMaps = textureQueryLevels(skybox);
 
 	vec4 topSkySample = textureLod(skybox, vec3(0.0, 1.0, 0.0), 10.0);
 	vec4 bottomSkySample = textureLod(skybox, vec3(0.0, -1.0, 0.0), 10.0);
@@ -188,17 +177,12 @@ void main()
 
 	for(int i = 0; i < numDirLights; i++) {
 		shadow = CalculateShadow(currentPosLightSpace, shadowBias);
-		lightResult += CalculateDirLight(dirLights[i], norm, currentPos, viewDir, specularSample, avgSceneLum, shadow);
+		lightResult += CalculateDirLight(dirLights[i], normal, currentPos, viewDir, specularSample, avgSceneLum, shadow);
 	}
 		
 	for(int i = 0; i < numPointLights; i++) {
-		lightResult += CalculatePointLight(pointLights[i], norm, currentPos, viewDir, specularSample, avgSceneLum, shadow);
+		lightResult += CalculatePointLight(pointLights[i], normal, currentPos, viewDir, specularSample, avgSceneLum, shadow);
 	}
 	
-	//lightResult += CalculatePointLight(vec3(-0.8, 1.0, -0.5), norm, currentPos, viewDir);
-	
-	//float4 diffuseColor = texture(albedo, texCoord * albedoScale);
-
 	FragColor = texture(albedo, texCoord * albedoScale) * vec4(albedoColor, 1.0) * vec4(max(lightResult, sceneAmbience), 1.0);
-	//FragColor = vec4(1.5, 1.5, 1.5, 1.0);
 }

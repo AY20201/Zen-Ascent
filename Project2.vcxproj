@@ -98,15 +98,16 @@
     <None Include="engine_resource\Shaders\basepostprocesser.frag" />
     <None Include="engine_resource\Shaders\default.frag" />
     <None Include="engine_resource\Shaders\default.vert" />
+    <None Include="engine_resource\Shaders\defaultdeferred.frag" />
     <None Include="engine_resource\Shaders\depth.frag" />
     <None Include="engine_resource\Shaders\depth.vert" />
     <None Include="engine_resource\Shaders\downsampler.frag" />
     <None Include="engine_resource\Shaders\fog.frag" />
     <None Include="engine_resource\Shaders\gbuffer.frag" />
-    <None Include="engine_resource\Shaders\gbuffer.vert" />
     <None Include="engine_resource\Shaders\glass.frag" />
     <None Include="engine_resource\Shaders\glass.vert" />
     <None Include="engine_resource\Shaders\jitter.comp" />
+    <None Include="engine_resource\Shaders\lighting.frag" />
     <None Include="engine_resource\Shaders\terraingen.comp" />
     <None Include="engine_resource\Shaders\tonemapper.frag" />
     <None Include="engine_resource\Shaders\postprocess.vert" />
