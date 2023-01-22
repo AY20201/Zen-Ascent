@@ -19,6 +19,7 @@
 #include"engine_headers/ComputeShader.h"
 #include"engine_headers/Plane.h"
 #include"engine_headers/BloomRenderer.h"
+#include"engine_headers/SSAO.h"
 #include"engine_headers/ShadowChunker.h"
 
 #include"game_headers/PlayerController.h"
@@ -107,11 +108,16 @@ int main()
 	FrameBufferObject shadowMapFrameBuffer(2048, 2048, 1, 1);
 	FrameBufferObject gBufferFrameBuffer(width, height, 3, 1);
 	FrameBufferObject fogFrameBuffer(width, height, 1, 1);
-	FrameBufferObject basePostFrameBuffer(width, height, 2, 1);
+	FrameBufferObject ssaoFrameBuffer(width, height, 1, 1);
+	FrameBufferObject blurFrameBuffer(width, height, 1, 1);
+	FrameBufferObject lightingFrameBuffer(width, height, 1, 1);
+	FrameBufferObject basePostFrameBuffer(width, height);
 	FrameBufferObject finalPassFrameBuffer(width, height, 1, 1);
+	basePostFrameBuffer.SetUpGBuffer();
 	basePostFrameBuffer.InitializeRenderQuad();
 
 	BloomRenderer bloomRenderer(width, height, 7);
+	SSAO ssaoRenderer(8);
 
 	//specify opengl viewport
 	glViewport(0, 0, width, height);
@@ -129,14 +135,17 @@ int main()
 	//Texture* marbleSpecMap = new Texture("engine_resource/Textures/marble_herringbone_roughness.png", GL_TEXTURE_2D, GL_LINEAR, /*1,*/ GL_RGB, GL_UNSIGNED_BYTE);
 	
 	//ObjectHandler objectHandler;
-	Shader shaderProgram("engine_resource/Shaders/default.vert", "engine_resource/Shaders/default.frag");
+	Shader shaderProgram("engine_resource/Shaders/default.vert", "engine_resource/Shaders/defaultdeferred.frag");
 	Shader glassShaderProgram("engine_resource/Shaders/glass.vert", "engine_resource/Shaders/glass.frag");
 	Shader skyBoxShaderProgram("engine_resource/Shaders/skybox.vert", "engine_resource/Shaders/skybox.frag");
 	Shader shadowShaderProgram("engine_resource/Shaders/depth.vert", "engine_resource/Shaders/depth.frag");
 	Shader fogShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/fog.frag");
+	Shader ssaoShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/ssao.frag");
+	Shader blurShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/blur.frag");
 	Shader basePostShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/basepostprocesser.frag");
+	Shader lightingShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/lighting.frag");
 	Shader tonemapperShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/tonemapper.frag");
-	Shader gbufferShaderProgram("engine_resource/Shaders/default.vert", "engine_resource/Shaders/defaultdeferred.frag");
+	//Shader gbufferShaderProgram("engine_resource/Shaders/default.vert", "engine_resource/Shaders/defaultdeferred.frag");
 
 	Shader bloomDownsampleShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/downsampler.frag");
 	Shader bloomUpsampleShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/upsampler.frag");
@@ -199,6 +208,7 @@ int main()
 	MeshScene floor2(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor2/floor2.obj" }, shaderProgram, nullptr);
 	MeshScene floor3(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor3/floor3.obj" }, shaderProgram, nullptr);
 	MeshScene floor4(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor4/floor4.obj" }, shaderProgram, nullptr);
+	MeshScene floor5(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor5/floor5.obj" }, shaderProgram, nullptr);
 
 	GameObject smallPyramid(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), pyramid, nullptr);
 	GameObject planeObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), plane.mesh, nullptr);
@@ -209,14 +219,13 @@ int main()
 	CollisionMesh planeCollider(plane.mesh.vertices, plane.mesh.indices, planeObject.transform.matrix, &planeObject);
 
 	ShadowChunker shadowChunker(0.5f);
+	ssaoRenderer.InitializeKernels();
+
+	//set ssao kernel
+	ssaoRenderer.SetSSAOKernel(ssaoShaderProgram);
 
 	//lighting shader
-	shaderProgram.Activate();
-	LightHandler::Instance.SetLightUniforms(shaderProgram);
-
-	//waterShader.Activate();
-	//glUniform1f(glGetUniformLocation(waterShader.ID, "nearClipPlane"), nearClipPlane);
-	//glUniform1f(glGetUniformLocation(waterShader.ID, "farClipPlane"), farClipPlane);
+	LightHandler::Instance.SetLightUniforms(lightingShaderProgram);
 
 	double currentTime = glfwGetTime();
 	double previousTime = glfwGetTime();
@@ -245,13 +254,14 @@ int main()
 		skyBoxShaderProgram.Activate();
 		glUniformMatrix4fv(glGetUniformLocation(skyBoxShaderProgram.ID, "camMatrix"), 1, GL_FALSE, glm::value_ptr(camera.projection * glm::mat4(glm::mat3(camera.view))));
 
-		shaderProgram.Activate();
+		lightingShaderProgram.Activate();
 
 		glm::vec3 camPos = camera.Position;
-		glUniform3f(glGetUniformLocation(shaderProgram.ID, "camPos"), camPos.x, camPos.y, camPos.z);
-
-		glUniform1i(glGetUniformLocation(shaderProgram.ID, "skybox"), sceneSkyBox.texUnit);
+		glUniform3f(glGetUniformLocation(lightingShaderProgram.ID, "camPos"), camPos.x, camPos.y, camPos.z);
+		glUniform1i(glGetUniformLocation(lightingShaderProgram.ID, "skybox"), sceneSkyBox.texUnit);
 		sceneSkyBox.Bind();
+
+		shaderProgram.Activate();
 
 		shadowChunker.Update(player.transform.position);
 		glm::mat4 lightProj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f); //hard coded change later
@@ -265,37 +275,80 @@ int main()
 
 		ObjectHandler::Instance.Update(deltaTime, window);
 
-		//geometry buffer
-		gBufferFrameBuffer.BindFrameBuffer();
-		gbufferShaderProgram.Activate();
-		glUniformMatrix4fv(glGetUniformLocation(gbufferShaderProgram.ID, "projection"), 1, GL_FALSE, glm::value_ptr(camera.projection));
-		glUniformMatrix4fv(glGetUniformLocation(gbufferShaderProgram.ID, "view"), 1, GL_FALSE, glm::value_ptr(camera.view));
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		ObjectHandler::Instance.DrawMeshes(gbufferShaderProgram, false);
-		gBufferFrameBuffer.UnbindFrameBuffer();
-
 		//shadow mapping
 		glCullFace(GL_FRONT);
 		shadowMapFrameBuffer.BindFrameBuffer();
 		glClear(GL_DEPTH_BUFFER_BIT);
-		ObjectHandler::Instance.DrawMeshes(shadowShaderProgram, false);
+		ObjectHandler::Instance.DrawMeshes(shadowShaderProgram, ObjectHandler::SKIP_TRANSPARENCY);
 		shadowMapFrameBuffer.UnbindFrameBuffer();
 		glCullFace(GL_BACK);
 		//
 		glViewport(0, 0, width, height);
-		//
+		//renders gBuffer
 		basePostFrameBuffer.BindFrameBuffer();
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-		shaderProgram.Activate();
-		shadowMapFrameBuffer.SetTexture(shadowMapFrameBuffer.depthTextures[0], shaderProgram, "shadowMap");
-		jitterComputeShader.SetTexture(shaderProgram, "jitterMap");
+		shadowMapFrameBuffer.SetTexture(shadowMapFrameBuffer.depthTextures[0], lightingShaderProgram, "shadowMap");
+		jitterComputeShader.SetTexture(lightingShaderProgram, "jitterMap");
 
-		ObjectHandler::Instance.DrawMeshes(false);
-		sceneSkyBox.Draw();
+		ObjectHandler::Instance.DrawMeshes(ObjectHandler::SKIP_TRANSPARENCY);
+		//sceneSkyBox.Draw();
 		basePostFrameBuffer.UnbindFrameBuffer();
 		//
-		//transparent object rendering
+		//renders ssao
+		
+		ssaoFrameBuffer.BindFrameBuffer();
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+		
+		ssaoShaderProgram.Activate();
+		basePostFrameBuffer.SetTexture(basePostFrameBuffer.colorTextures[0], ssaoShaderProgram, "gPosition");
+		basePostFrameBuffer.SetTexture(basePostFrameBuffer.colorTextures[2], ssaoShaderProgram, "gNormal");
+
+		ssaoRenderer.SetTexture(ssaoRenderer.noiseTextureID, ssaoRenderer.noiseTextureUnit, ssaoShaderProgram, "noiseTexture");
+		glUniformMatrix4fv(glGetUniformLocation(ssaoShaderProgram.ID, "projection"), 1, GL_FALSE, glm::value_ptr(camera.projection));
+		glUniformMatrix4fv(glGetUniformLocation(ssaoShaderProgram.ID, "view"), 1, GL_FALSE, glm::value_ptr(camera.view));
+
+		basePostFrameBuffer.RenderQuad(ssaoShaderProgram);
+
+		ssaoFrameBuffer.UnbindFrameBuffer();
+
+		//
+		//
+		//blurs ssao
+		blurFrameBuffer.BindFrameBuffer();
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+		blurShaderProgram.Activate();
+		basePostFrameBuffer.SetTexture(ssaoFrameBuffer.colorTextures[0], blurShaderProgram, "renderedScene");
+
+		basePostFrameBuffer.RenderQuad(blurShaderProgram);
+
+		blurFrameBuffer.UnbindFrameBuffer();
+		//
+		
+
+		//lights previously rendered gBuffer
+		lightingFrameBuffer.BindFrameBuffer();
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+		basePostFrameBuffer.SetTexture(basePostFrameBuffer.colorTextures[0], lightingShaderProgram, "gPosition");
+		basePostFrameBuffer.SetTexture(basePostFrameBuffer.colorTextures[1], lightingShaderProgram, "gLightPosition");
+		basePostFrameBuffer.SetTexture(basePostFrameBuffer.colorTextures[2], lightingShaderProgram, "gNormal");
+		basePostFrameBuffer.SetTexture(basePostFrameBuffer.colorTextures[3], lightingShaderProgram, "gAlbedo");
+		basePostFrameBuffer.SetTexture(blurFrameBuffer.colorTextures[0], lightingShaderProgram, "ssao");
+
+		basePostFrameBuffer.RenderQuad(lightingShaderProgram);
+
+		sceneSkyBox.Draw();
+
+		lightingFrameBuffer.UnbindFrameBuffer();
+		
+		//make it render based on depth
+		//glBindFramebuffer(GL_READ_FRAMEBUFFER, basePostFrameBuffer.bufferID);
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, finalPassFrameBuffer.bufferID);
+		//glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		// 
+		//transparent object rendering, need to render based on depth
 		finalPassFrameBuffer.BindFrameBuffer();
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -303,19 +356,26 @@ int main()
 		glUniform3f(glGetUniformLocation(glassShaderProgram.ID, "camPos"), camPos.x, camPos.y, camPos.z);
 		glUniform1i(glGetUniformLocation(glassShaderProgram.ID, "skybox"), sceneSkyBox.texUnit);
 		sceneSkyBox.Bind();
-		basePostFrameBuffer.SetTexture(basePostFrameBuffer.colorTextures[0], glassShaderProgram, "colorSampler");
+		basePostFrameBuffer.SetTexture(lightingFrameBuffer.colorTextures[0], glassShaderProgram, "colorSampler");
 
-		ObjectHandler::Instance.DrawMeshes(true);
-		sceneSkyBox.Draw();
+		basePostShaderProgram.Activate();
+		basePostFrameBuffer.SetTexture(lightingFrameBuffer.colorTextures[0], basePostShaderProgram, "renderedScene");
+		basePostFrameBuffer.SetTexture(lightingFrameBuffer.depthTextures[0], basePostShaderProgram, "renderedSceneDepth");
+		glDepthFunc(GL_LEQUAL);
+		basePostFrameBuffer.RenderQuad(basePostShaderProgram);
+		glDepthFunc(GL_LESS);
+
+		glassShaderProgram.Activate();
+		ObjectHandler::Instance.DrawMeshes(ObjectHandler::DRAW_ONLY_TRANSPARENCY);
 
 		finalPassFrameBuffer.UnbindFrameBuffer();
-
+		
+		
 		//
 		//fog pass 1, only renders within walls
 		fogFrameBuffer.BindFrameBuffer();
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-		fogShaderProgram.Activate();
 		basePostFrameBuffer.SetTexture(finalPassFrameBuffer.colorTextures[0], fogShaderProgram, "renderedScene");
 		basePostFrameBuffer.SetTexture(finalPassFrameBuffer.depthTextures[0], fogShaderProgram, "renderedSceneDepth");
 		basePostFrameBuffer.RenderQuad(fogShaderProgram);

@@ -138,6 +138,9 @@
     <ClCompile Include="engine_source\AABB.cpp">
       <Filter>Source Files\engine_source</Filter>
     </ClCompile>
+    <ClCompile Include="engine_source\SSAO.cpp">
+      <Filter>Source Files\engine_source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine_headers\Material.h">
@@ -225,6 +228,9 @@
       <Filter>Header Files\engine_headers</Filter>
     </ClInclude>
     <ClInclude Include="engine_headers\AABB.h">
+      <Filter>Header Files\engine_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="engine_headers\SSAO.h">
       <Filter>Header Files\engine_headers</Filter>
     </ClInclude>
   </ItemGroup>
@@ -316,6 +322,12 @@
       <Filter>Resource Files\engine_resource\Shaders</Filter>
     </None>
     <None Include="engine_resource\Shaders\defaultdeferred.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\ssao.frag">
+      <Filter>Resource Files\engine_resource\Shaders</Filter>
+    </None>
+    <None Include="engine_resource\Shaders\blur.frag">
       <Filter>Resource Files\engine_resource\Shaders</Filter>
     </None>
   </ItemGroup>

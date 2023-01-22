@@ -1,8 +1,8 @@
 #version 440 core
-layout (location = 0) out vec3 gPosition;
+layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gLightPosition;
 layout (location = 2) out vec3 gNormal;
-layout (location = 3) out vec4 gAlbedo;
+layout (location = 3) out vec3 gAlbedo;
 
 in vec2 texCoord;
 in vec3 normal;
@@ -16,7 +16,7 @@ uniform vec3 albedoColor;
 uniform sampler2D normalMap;
 uniform float normalMapScale;
 
-float lightingFactor = 1.0;
+float normalMapStrength = 0.5;
 
 void main()
 {
@@ -29,9 +29,8 @@ void main()
 	mat3 TBN = mat3(tan, bitangent, norm);
 	norm = normalize(TBN * normalMapSample);
 
-	gPosition = currentPos;
+	gPosition = vec4(currentPos, gl_FragCoord.z);
 	gLightPosition = currentPosLightSpace;
 	gNormal = norm;
-	gAlbedo.rgb = texture(albedo, texCoord * albedoScale).rgb * albedoColor;
-	gAlbedo.a = lightingFactor;
+	gAlbedo = texture(albedo, texCoord * albedoScale).rgb * albedoColor;
 }

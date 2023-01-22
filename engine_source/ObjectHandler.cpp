@@ -12,19 +12,26 @@ GameObject* ObjectHandler::GetGameObject(int id)
 	return gameObjects[id];
 }
 
-void ObjectHandler::DrawMeshes(bool ignoreTransparency)
+void ObjectHandler::DrawMeshes(TransparentRender transparency) //0 = skip transparent, 1 = draw both, 2 = only transparent
 {
 	for (unsigned int i = 0; i < gameObjects.size(); i++)
 	{
 		for (unsigned int j = 0; j < gameObjects[i]->meshes.size(); j++)
 		{
-			if (ignoreTransparency)
+			if (transparency == DRAW_TRANSPARENCY)
 			{
 				gameObjects[i]->meshes[j].Draw(gameObjects[i]->transform.matrix);
 			}
-			else 
+			else if(transparency == SKIP_TRANSPARENCY)
 			{
 				if (!gameObjects[i]->meshes[j].material->transparent)
+				{
+					gameObjects[i]->meshes[j].Draw(gameObjects[i]->transform.matrix);
+				}
+			}
+			else if(transparency == DRAW_ONLY_TRANSPARENCY)
+			{
+				if (gameObjects[i]->meshes[j].material->transparent)
 				{
 					gameObjects[i]->meshes[j].Draw(gameObjects[i]->transform.matrix);
 				}
@@ -35,19 +42,26 @@ void ObjectHandler::DrawMeshes(bool ignoreTransparency)
 	}
 }
 
-void ObjectHandler::DrawMeshes(Shader& shader, bool ignoreTransparency)
+void ObjectHandler::DrawMeshes(Shader& shader, TransparentRender transparency)
 {
 	for (unsigned int i = 0; i < gameObjects.size(); i++)
 	{
 		for (unsigned int j = 0; j < gameObjects[i]->meshes.size(); j++)
 		{
-			if (ignoreTransparency)
+			if (transparency == DRAW_TRANSPARENCY)
 			{
 				gameObjects[i]->meshes[j].Draw(gameObjects[i]->transform.matrix, shader);
 			}
-			else
+			else if (transparency == SKIP_TRANSPARENCY)
 			{
 				if (!gameObjects[i]->meshes[j].material->transparent)
+				{
+					gameObjects[i]->meshes[j].Draw(gameObjects[i]->transform.matrix, shader);
+				}
+			}
+			else if (transparency == DRAW_ONLY_TRANSPARENCY)
+			{
+				if (gameObjects[i]->meshes[j].material->transparent)
 				{
 					gameObjects[i]->meshes[j].Draw(gameObjects[i]->transform.matrix, shader);
 				}

@@ -10,13 +10,20 @@ class ObjectHandler
 {
 	public:
 
+		enum TransparentRender
+		{
+			SKIP_TRANSPARENCY,
+			DRAW_TRANSPARENCY,
+			DRAW_ONLY_TRANSPARENCY
+		};
+
 		static ObjectHandler Instance;
 		std::vector <GameObject*> gameObjects;
 		
 		void AddGameObject(GameObject* gameObject);
 		GameObject* GetGameObject(int id);
-		void DrawMeshes(bool ignoreTransparency);
-		void DrawMeshes(Shader& shader, bool ignoreTransparency);
+		void DrawMeshes(TransparentRender transparency);
+		void DrawMeshes(Shader& shader, TransparentRender transparency);
 		void Awake();
 		void Update(float deltaTime, GLFWwindow* window);
 		void Delete();

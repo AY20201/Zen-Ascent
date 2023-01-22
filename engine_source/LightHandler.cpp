@@ -18,6 +18,8 @@ void LightHandler::AddLight(Light* light)
 
 void LightHandler::SetLightUniforms(Shader& shader)
 {
+	shader.Activate();
+
 	glUniform1i(glGetUniformLocation(shader.ID, "numPointLights"), static_cast<int>(pointLights.size()));
 	glUniform1i(glGetUniformLocation(shader.ID, "numDirLights"), static_cast<int>(dirLights.size()));
 

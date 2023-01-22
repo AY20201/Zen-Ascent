@@ -19,7 +19,7 @@ float minFog = 0.3;
 void main()
 {
 	float depthSample = texture(renderedSceneDepth, texCoord).r;
-	float depth = 2.0 * nearPlane * farPlane / (farPlane + nearPlane - (2.0 * depthSample - 1.0) * (farPlane - nearPlane));
+	float depth = (2.0 * nearPlane * farPlane) / (farPlane + nearPlane - (2.0 * depthSample - 1.0) * (farPlane - nearPlane));
 	//float fogFactor = clamp((maxDist - depth) / (maxDist - minDist), 0.0, 1.0);
 	float fogFactor = 1.0 / pow(2, (depth * density) * (depth * density));
 

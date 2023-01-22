@@ -45,6 +45,7 @@
     <ClCompile Include="engine_source\Shader.cpp" />
     <ClCompile Include="engine_source\ShadowChunker.cpp" />
     <ClCompile Include="engine_source\Skybox.cpp" />
+    <ClCompile Include="engine_source\SSAO.cpp" />
     <ClCompile Include="engine_source\Texture.cpp" />
     <ClCompile Include="engine_source\Transform.cpp" />
     <ClCompile Include="engine_source\VAO.cpp" />
@@ -78,6 +79,7 @@
     <ClInclude Include="engine_headers\Shader.h" />
     <ClInclude Include="engine_headers\ShadowChunker.h" />
     <ClInclude Include="engine_headers\Skybox.h" />
+    <ClInclude Include="engine_headers\SSAO.h" />
     <ClInclude Include="engine_headers\Texture.h" />
     <ClInclude Include="engine_headers\Transform.h" />
     <ClInclude Include="engine_headers\VAO.h" />
@@ -96,6 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="engine_resource\Shaders\basepostprocesser.frag" />
+    <None Include="engine_resource\Shaders\blur.frag" />
     <None Include="engine_resource\Shaders\default.frag" />
     <None Include="engine_resource\Shaders\default.vert" />
     <None Include="engine_resource\Shaders\defaultdeferred.frag" />
@@ -108,6 +111,7 @@
     <None Include="engine_resource\Shaders\glass.vert" />
     <None Include="engine_resource\Shaders\jitter.comp" />
     <None Include="engine_resource\Shaders\lighting.frag" />
+    <None Include="engine_resource\Shaders\ssao.frag" />
     <None Include="engine_resource\Shaders\terraingen.comp" />
     <None Include="engine_resource\Shaders\tonemapper.frag" />
     <None Include="engine_resource\Shaders\postprocess.vert" />

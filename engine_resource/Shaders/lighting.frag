@@ -36,11 +36,11 @@ uniform samplerCube skybox;
 
 uniform sampler2D shadowMap;
 uniform sampler2D jitterMap;
+uniform sampler2D ssao;
 
 float ambientFactor = 1.0;
 float specularStrength = 0.5;
 float specPower = 8;
-float normalMapStrength = 0.5;
 
 float initAtten = 1.0;
 float constantAtten = 1.0;
@@ -144,10 +144,12 @@ float CalculateShadow(vec4 fragPosLightSpace, float bias)
 
 void main()
 {
-	vec3 currentPos = texture(gPosition, texCoord).rgb;
-	vec3 currentPosLightSpace = texture(gLightPosition, texCoord).rgb;
+	vec3 currentPos = texture(gPosition, texCoord).xyz;
+	vec4 currentPosLightSpace = texture(gLightPosition, texCoord);
 	vec3 normal = texture(gNormal, texCoord).rgb;
 	vec3 albedo = texture(gAlbedo, texCoord).rgb;
+
+	float ambientOcculsion = texture(ssao, texCoord).r;
 
 	vec3 specularSample = vec3(specularStrength, specularStrength, specularStrength);
 
@@ -172,7 +174,7 @@ void main()
 	float sceneAmbience = avgSceneLum * ambientFactor;
 
 	vec3 lightResult = vec3(0, 0, 0);
-	float shadowBias = 0.0002;
+	float shadowBias = 0.0001;
 	float shadow = 0.0;
 
 	for(int i = 0; i < numDirLights; i++) {
@@ -183,6 +185,7 @@ void main()
 	for(int i = 0; i < numPointLights; i++) {
 		lightResult += CalculatePointLight(pointLights[i], normal, currentPos, viewDir, specularSample, avgSceneLum, shadow);
 	}
-	
-	FragColor = texture(albedo, texCoord * albedoScale) * vec4(albedoColor, 1.0) * vec4(max(lightResult, sceneAmbience), 1.0);
+
+	gl_FragDepth = texture(gPosition, texCoord).a;
+	FragColor = vec4(albedo, 1.0) * vec4(max(lightResult, sceneAmbience), 1.0) * ambientOcculsion;
 }

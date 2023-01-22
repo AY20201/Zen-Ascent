@@ -47,6 +47,10 @@ FrameBufferObject::FrameBufferObject(int screenWidth, int screenHeight) {
 
 	glGenFramebuffers(1, &bufferID);
 
+	TextureObject depthTexObj = TextureObject{};
+	depthTextures.push_back(depthTexObj);
+	AttachDepthTexture(depthTextures[0]);
+
 	UnbindFrameBuffer();
 	UnbindTexture();
 }
@@ -102,12 +106,12 @@ void FrameBufferObject::SetUpGBuffer()
 	TextureObject colTexObj = TextureObject{};
 	colorTextures.push_back(colTexObj);
 
-	AttachColorTexture(colorTextures[0], 0, GL_RGBA16F, GL_FLOAT);
+	AttachColorTexture(colorTextures[0], 0, GL_RGBA32F, GL_FLOAT);
 
 	TextureObject colTexObj1 = TextureObject{};
 	colorTextures.push_back(colTexObj1);
 
-	AttachColorTexture(colorTextures[1], 1, GL_RGBA16F, GL_UNSIGNED_BYTE);
+	AttachColorTexture(colorTextures[1], 1, GL_RGBA32F, GL_FLOAT);
 	
 	TextureObject colTexObj2 = TextureObject{};
 	colorTextures.push_back(colTexObj2);
