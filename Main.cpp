@@ -67,8 +67,8 @@ GLuint indices[] =
 	13, 15, 14 // Facing side
 };
 
-const unsigned int width = 1600;
-const unsigned int height = 1600;
+//const unsigned int width = 1600;
+//const unsigned int height = 1600;
 
 glm::vec3 modelPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -79,14 +79,25 @@ int main()
 {
 	glfwInit();
 
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 	//specify opengl version
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	//specify opengl profile, core has most up to date functions
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+	glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+	glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+	glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+	glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+	const int width = mode->width;
+	const int height = mode->height;
+
 	//create window
-	GLFWwindow* window = glfwCreateWindow(width, height, "Project1", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, "Project1", monitor, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Window failed to create" << std::endl;
@@ -108,7 +119,7 @@ int main()
 	FrameBufferObject shadowMapFrameBuffer(2048, 2048, 1, 1);
 	FrameBufferObject gBufferFrameBuffer(width, height, 3, 1);
 	FrameBufferObject fogFrameBuffer(width, height, 1, 1);
-	FrameBufferObject ssaoFrameBuffer(width, height, 1, 1);
+	FrameBufferObject ssaoFrameBuffer(width / 2, height / 2, 1, 1);
 	FrameBufferObject blurFrameBuffer(width, height, 1, 1);
 	FrameBufferObject lightingFrameBuffer(width, height, 1, 1);
 	FrameBufferObject basePostFrameBuffer(width, height);
@@ -167,7 +178,12 @@ int main()
 	PointLight light5(glm::vec3(9.4f, 3.3f, 5.8f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
 	PointLight light6(glm::vec3(7.3f, 4.5f, 9.4f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
 
-	DirectionalLight globalDirectionalLight(glm::vec3(0.6f, -0.5f, -0.5f), glm::vec3(1.0f, 0.98f, 0.94f), 2.0f);
+	PointLight light7(glm::vec3(6.0f, 2.5f, 5.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, /*attenuation*/3.5f, 1.0f, 0.5f, 0.3f);
+	PointLight light8(glm::vec3(5.0f, 7.5f, 5.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, /*attenuation*/3.5f, 1.0f, 0.5f, 0.3f);
+	PointLight light9(glm::vec3(5.0f, 12.5f, 6.0f), glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, /*attenuation*/3.5f, 1.0f, 0.5f, 0.3f);
+	PointLight light10(glm::vec3(4.0f, 17.5f, 5.5f), glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, /*attenuation*/3.5f, 1.0f, 0.5f, 0.3f);
+
+	DirectionalLight globalDirectionalLight(glm::vec3(0.6f, -0.5f, -0.5f), glm::vec3(1.0f, 0.98f, 0.94f), 2.5f);
 
 	Material* material = new Material(shaderProgram, TexParam{ "albedo", brickTexture, 1.0f }, TexParam{"normalMap", normalMap, 1.0f }/*TexParam{"specMap", marbleSpecMap, 1.0}*/, false);
 	Material* glass = new Material(glassShaderProgram, TexParam{ "", nullptr, 1.0f }, TexParam{ "", nullptr, 1.0f }, true);
@@ -248,8 +264,8 @@ int main()
 
 		//camera.FlyController(window);
 		camera.UpdateMatrix(45.0f, nearClipPlane, farClipPlane);
-		camera.SetMatrix(shaderProgram, "camMatrix");
-		camera.SetMatrix(glassShaderProgram, "camMatrix");
+		camera.SetMatrices(shaderProgram, "view", "projection");
+		camera.SetMatrices(glassShaderProgram, "view", "projection");
 		//camera.SetMatrix(waterShader, "camMatrix");
 		skyBoxShaderProgram.Activate();
 		glUniformMatrix4fv(glGetUniformLocation(skyBoxShaderProgram.ID, "camMatrix"), 1, GL_FALSE, glm::value_ptr(camera.projection * glm::mat4(glm::mat3(camera.view))));
@@ -301,12 +317,13 @@ int main()
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 		
 		ssaoShaderProgram.Activate();
-		basePostFrameBuffer.SetTexture(basePostFrameBuffer.colorTextures[0], ssaoShaderProgram, "gPosition");
 		basePostFrameBuffer.SetTexture(basePostFrameBuffer.colorTextures[2], ssaoShaderProgram, "gNormal");
+		basePostFrameBuffer.SetTexture(basePostFrameBuffer.colorTextures[4], ssaoShaderProgram, "gViewSpacePosition");
 
 		ssaoRenderer.SetTexture(ssaoRenderer.noiseTextureID, ssaoRenderer.noiseTextureUnit, ssaoShaderProgram, "noiseTexture");
-		glUniformMatrix4fv(glGetUniformLocation(ssaoShaderProgram.ID, "projection"), 1, GL_FALSE, glm::value_ptr(camera.projection));
-		glUniformMatrix4fv(glGetUniformLocation(ssaoShaderProgram.ID, "view"), 1, GL_FALSE, glm::value_ptr(camera.view));
+		camera.SetViewMatrix(ssaoShaderProgram, "view");
+		camera.SetProjectionMatrix(ssaoShaderProgram, "projection");
+		glUniform2f(glGetUniformLocation(ssaoShaderProgram.ID, "noiseScale"), (float)width / (2.0f * 4.0f), (float)height / (2.0f * 4.0f));
 
 		basePostFrameBuffer.RenderQuad(ssaoShaderProgram);
 

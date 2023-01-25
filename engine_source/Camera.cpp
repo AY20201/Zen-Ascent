@@ -13,16 +13,32 @@ void Camera::UpdateMatrix(float fov, float nearClipPlane, float farClipPlane)
 	projection = glm::mat4(1.0f);
 
 	view = glm::lookAt(Position, Position + Orientation, Up);
-	projection = glm::perspective(glm::radians(fov), (float)(width / height), nearClipPlane, farClipPlane);
+	projection = glm::perspective(glm::radians(fov), (float)width / (float)height, nearClipPlane, farClipPlane);
 
 }
 
-void Camera::SetMatrix(Shader& shader, const char* uniform)
+void Camera::SetMatrices(Shader& shader, const char* viewUniform, const char* projUniform)
+{
+	shader.Activate();
+
+	glUniformMatrix4fv(glGetUniformLocation(shader.ID, viewUniform), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(shader.ID, projUniform), 1, GL_FALSE, glm::value_ptr(projection));
+}
+
+void Camera::SetViewMatrix(Shader& shader, const char* uniform)
 {
 	shader.Activate();
 
 	int uniLocation = glGetUniformLocation(shader.ID, uniform);
-	glUniformMatrix4fv(uniLocation, 1, GL_FALSE, glm::value_ptr(projection * view));
+	glUniformMatrix4fv(uniLocation, 1, GL_FALSE, glm::value_ptr(view));
+}
+
+void Camera::SetProjectionMatrix(Shader& shader, const char* uniform)
+{
+	shader.Activate();
+
+	int uniLocation = glGetUniformLocation(shader.ID, uniform);
+	glUniformMatrix4fv(uniLocation, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
 void Camera::FlyController(GLFWwindow* window)

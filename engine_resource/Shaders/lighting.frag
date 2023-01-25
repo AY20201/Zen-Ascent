@@ -12,6 +12,11 @@ struct PointLight {
 	vec3 position;
 	vec3 color;
 	float intensity;
+
+	float initAtten;
+	float constAtten;
+	float linearAtten;
+	float expAtten;
 };
 
 struct DirectionalLight {
@@ -38,14 +43,14 @@ uniform sampler2D shadowMap;
 uniform sampler2D jitterMap;
 uniform sampler2D ssao;
 
-float ambientFactor = 1.0;
+float ambientFactor = 1.25;
 float specularStrength = 0.5;
 float specPower = 8;
 
-float initAtten = 1.0;
-float constantAtten = 1.0;
-float linearAtten = 0.5;
-float expAtten = 0.3;
+//float initAtten = 1.0;
+//float constantAtten = 1.0;
+//float linearAtten = 0.5;
+//float expAtten = 0.3;
 
 float brightnessThreshold = 0.05; //unused value, corresponds to 7.2
 float distanceThreshold = 7.2;
@@ -54,7 +59,7 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewD
 {
 	vec3 pos = light.position;
 	vec3 color = light.color;
-	float iten = light.intensity;
+	float inten = light.intensity;
 
 	vec3 norm = normalize(normal);
 	vec3 lightDirection = normalize(pos - fragPos);
@@ -71,16 +76,16 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewD
 
 	float dist = distance(pos, fragPos);
 	
-	float falloff = initAtten / (constantAtten + linearAtten * dist + expAtten * dist * dist);
+	float falloff = light.initAtten / (light.constAtten + light.linearAtten * dist + light.expAtten * dist * dist);
 
-	return (diffuse + specular * skyboxSample) * iten * falloff * color;
+	return (diffuse + specular * skyboxSample) * inten * falloff * color;
 }
 
 vec3 CalculateDirLight(DirectionalLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 specFactor, float sceneAmbience, float shadow)
 {
 	vec3 dir = light.direction;
 	vec3 color = light.color;
-	float iten = light.intensity;
+	float inten = light.intensity;
 
 	vec3 norm = normalize(normal);
 	vec3 lightDirection = normalize(-dir);
@@ -95,7 +100,7 @@ vec3 CalculateDirLight(DirectionalLight light, vec3 normal, vec3 fragPos, vec3 v
 	vec3 skyboxSample = vec3(texture(skybox, environmentReflectDir));
 	float skyboxBrightness = 0.2126 * skyboxSample.r + 0.7152 * skyboxSample.g + 0.0722 * skyboxSample.b;
 
-	return ((diffuse + specular * skyboxSample) * (1.0 - shadow)) * iten * sceneAmbience * color;
+	return ((diffuse + specular * skyboxSample) * (1.0 - shadow)) * inten * sceneAmbience * color;
 }
 
 float CalculatePixelLum(vec4 sampleColor)

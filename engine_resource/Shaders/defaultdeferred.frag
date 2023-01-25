@@ -3,12 +3,14 @@ layout (location = 0) out vec4 gPosition;
 layout (location = 1) out vec4 gLightPosition;
 layout (location = 2) out vec3 gNormal;
 layout (location = 3) out vec3 gAlbedo;
+layout (location = 4) out vec3 gViewSpacePosition;
 
 in vec2 texCoord;
 in vec3 normal;
 in vec3 currentPos;
 in vec4 currentPosLightSpace;
 in vec3 tangent;
+in vec3 viewSpacePosition;
 
 uniform sampler2D albedo;
 uniform float albedoScale;
@@ -33,4 +35,5 @@ void main()
 	gLightPosition = currentPosLightSpace;
 	gNormal = norm;
 	gAlbedo = texture(albedo, texCoord * albedoScale).rgb * albedoColor;
+	gViewSpacePosition = viewSpacePosition;
 }

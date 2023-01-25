@@ -35,7 +35,9 @@ class Camera
 		Camera() = default;
 
 		void UpdateMatrix(float fov, float nearClipPlane, float farClipPlane);
-		void SetMatrix(Shader& shader, const char* uniform);
+		void SetMatrices(Shader& shader, const char* viewUniform, const char* projUniform);
+		void SetViewMatrix(Shader& shader, const char* uniform);
+		void SetProjectionMatrix(Shader& shader, const char* uniform);
 		void FlyController(GLFWwindow* window);
 		void Look(GLFWwindow* window);
 };

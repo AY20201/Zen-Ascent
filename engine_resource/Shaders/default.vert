@@ -9,8 +9,11 @@ out vec3 normal;
 out vec3 currentPos;
 out vec4 currentPosLightSpace;
 out vec3 tangent;
+out vec3 viewSpacePosition;
 
-uniform mat4 camMatrix;
+uniform mat4 view;
+uniform mat4 projection;
+
 uniform mat4 modelMatrix;
 uniform mat4 lightMatrix;
 
@@ -18,8 +21,9 @@ void main()
 {
 	currentPos = vec3(modelMatrix * vec4(aPos, 1.0f));
 	currentPosLightSpace = lightMatrix * vec4(currentPos, 1.0);
-	gl_Position = camMatrix * modelMatrix * vec4(aPos, 1.0);
+	gl_Position = projection * view * modelMatrix * vec4(aPos, 1.0);
 	texCoord = aTex;
 	normal = mat3(transpose(inverse(modelMatrix))) * aNormal;
 	tangent = aTangent;
+	viewSpacePosition = (view * vec4(currentPos, 1.0)).xyz;
 }

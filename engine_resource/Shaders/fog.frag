@@ -11,10 +11,10 @@ float farPlane = 100.0;
 
 float maxDist = 8.0;
 float minDist = 1.0;
-vec4 fogColor = vec4(0.4, 0.4, 0.4, 1.0);
+vec4 fogColor = vec4(0.39, 0.4, 0.4, 1.0);
 
 float density = 0.075;
-float minFog = 0.3;
+float minFog = 0.25;
 
 void main()
 {

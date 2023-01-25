@@ -3,23 +3,33 @@ out vec4 FragColor;
 
 in vec2 texCoord;
 
-uniform sampler2D gPosition;
 uniform sampler2D gNormal;
+uniform sampler2D gViewSpacePosition;
 uniform sampler2D noiseTexture;
 
 uniform vec3 samples[16];
 uniform mat4 projection;
 uniform mat4 view;
 
+uniform vec2 noiseScale;
+
 float nearPlane = 0.1;
 float farPlane = 100.0;
 
-vec2 noiseScale = vec2(1600.0 / 4.0, 1600.0 / 4.0);
 float radius = 0.125;
+
+vec3 VSPositionFromDepth(vec2 tCoord, float depthSample)
+{
+	float x = tCoord.x * 2.0 - 1.0;
+	float y = (1.0 - tCoord.y) * 2.0 - 1.0;
+	vec4 projectedPos = vec4(x, y, depthSample, 1.0);
+	vec4 viewSpacePosition = inverse(projection) * projectedPos;
+	return viewSpacePosition.xyz / viewSpacePosition.w;
+}
 
 void main()
 {
-	vec3 currentPos = vec3(view * vec4(texture(gPosition, texCoord).xyz, 1.0));
+	vec3 currentPos = texture(gViewSpacePosition, texCoord).xyz;
 	vec3 normal = mat3(transpose(inverse(view))) * texture(gNormal, texCoord).rgb;
 	vec3 randomVec = texture(noiseTexture, texCoord * noiseScale).xyz;
 
@@ -39,8 +49,9 @@ void main()
 		offset.xy = offset.xy * 0.5 + 0.5;
 
 		
-		float ndc = texture(gPosition, offset.xy).a;
-		float sampleDepth = ndc >= 1.0 ? farPlane : vec3(view * vec4(texture(gPosition, offset.xy).xyz, 1.0)).z;
+		//float ndc = texture(gPosition, offset.xy).a;
+		//float sampleDepth = ndc >= 1.0 ? farPlane : texture(gViewSpacePosition, offset.xy).z;
+		float sampleDepth = texture(gViewSpacePosition, offset.xy).z;
 
 		float rangeCheck = smoothstep(0.0, 1.0, radius / abs(currentPos.z - sampleDepth));
 		occlusion += (sampleDepth >= samplePos.z + 0.025 ? 1.0 : 0.0) * rangeCheck;

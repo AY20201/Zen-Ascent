@@ -123,8 +123,13 @@ void FrameBufferObject::SetUpGBuffer()
 
 	AttachColorTexture(colorTextures[3], 3, GL_RGBA, GL_UNSIGNED_BYTE);
 
-	unsigned int attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-	glDrawBuffers(4, attachments);
+	TextureObject colTexObj4 = TextureObject{};
+	colorTextures.push_back(colTexObj4);
+
+	AttachColorTexture(colorTextures[4], 4, GL_RGBA16F, GL_FLOAT);
+
+	unsigned int attachments[5] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+	glDrawBuffers(5, attachments);
 }
 
 void FrameBufferObject::Delete() {
