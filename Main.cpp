@@ -1,4 +1,5 @@
 #include<iostream>
+#include<fstream>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 
@@ -219,17 +220,32 @@ int main()
 	MeshScene importedMonkey(Transform(glm::vec3(-1.0f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec3(0.35f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/textured_monkey/monkey.obj", "engine_resource/3D Objects/textured_monkey/monkey_lod_1.obj" }, shaderProgram, nullptr);
 	MeshScene importedDonut(Transform(glm::vec3(-2.5f, 0.25f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/colored_donut/colored_donut.obj", "engine_resource/3D Objects/colored_donut/colored_donut_lod_1.obj" }, shaderProgram, nullptr);
 	
-	MeshScene walls(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/walls/walls.obj" }, glassShaderProgram, glass);
+	MeshScene walls(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/walls/walls1.obj" }, glassShaderProgram, glass);
 	MeshScene floor1(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor1/floor1.obj" }, shaderProgram, nullptr);
 	MeshScene floor2(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor2/floor2.obj" }, shaderProgram, nullptr);
 	MeshScene floor3(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor3/floor3.obj" }, shaderProgram, nullptr);
 	MeshScene floor4(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor4/floor4.obj" }, shaderProgram, nullptr);
 	MeshScene floor5(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor5/floor5.obj" }, shaderProgram, nullptr);
+	MeshScene floor6(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor6/floor6.obj" }, shaderProgram, nullptr);
+	MeshScene floor7(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor7/floor7.obj" }, shaderProgram, nullptr);
+	MeshScene floor8(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor8/floor8.obj" }, shaderProgram, nullptr);
+	MeshScene floor9(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor9/floor9.obj" }, shaderProgram, nullptr);
+
+	glm::vec3 loadPlayerPos;
+	//glm::vec3 loadCamOrientation;
+	std::ifstream testLoad("engine_resource/Save Games/testsave1.txt");
+
+	testLoad >> loadPlayerPos.x >> loadPlayerPos.y >> loadPlayerPos.z;
+	//testLoad >> loadCamOrientation.x >> loadCamOrientation.y >> loadCamOrientation.z;
+
+	//camera.Orientation = loadCamOrientation;
+
+	//std::cout << loadPlayerPos.x << " " << loadPlayerPos.y << " " << loadPlayerPos.z;
 
 	GameObject smallPyramid(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), pyramid, nullptr);
 	GameObject planeObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), plane.mesh, nullptr);
 	PlayerController* playerController = new PlayerController(2.0f, 0.6f, &camera, glm::vec3(0.35f, 0.7f, 0.35f));
-	GameObject player(glm::vec3(1.0f, 2.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f), Mesh(), playerController);
+	GameObject player(/*glm::vec3(loadPlayerPos.x, loadPlayerPos.y + 0.1f, loadPlayerPos.z)*/glm::vec3(1.0f, 2.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f), Mesh(), playerController);
 	
 	CollisionMesh pyramidCollider(verts, ind, smallPyramid.transform.matrix, &smallPyramid);
 	CollisionMesh planeCollider(plane.mesh.vertices, plane.mesh.indices, planeObject.transform.matrix, &planeObject);
@@ -424,11 +440,18 @@ int main()
 		//tonemapperFrameBuffer.SetTexture(tonemapperFrameBuffer.colorTexture, tonemapperShaderProgram, "renderedScene");
 		//tonemapperFrameBuffer.RenderQuad(tonemapperShaderProgram);
 
+		//std::cout << 1.0f / deltaTime << std::endl;
+
 		//clear and draw screen
 		glfwSwapBuffers(window);
 		//pool all glfw events like window resizing
 		glfwPollEvents();
 	}
+
+	//save game
+	std::ofstream testSave("engine_resource/Save Games/testsave1.txt");
+	testSave << player.transform.position.x << " " << player.transform.position.y << " " << player.transform.position.z << std::endl;
+	//testSave << camera.Orientation.x << " " << camera.Orientation.y << " " << camera.Orientation.z;
 
 	//importedCube.Clear();
 	importedMonkey.Clear();
