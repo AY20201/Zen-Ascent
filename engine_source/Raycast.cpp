@@ -1,6 +1,6 @@
 #include"../engine_headers/Raycast.h"
 
-void Raycast::CheckRayTriangleCollision(float maxDist, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
+void Raycast::CheckRayTriangleCollision(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3)
 {
 	CollisionPlane trianglePlane(p1, p2, p3);
 	if (trianglePlane.IsFrontFacingTo(glm::normalize(direction)))

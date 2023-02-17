@@ -14,10 +14,12 @@ public:
 	std::vector <Vertex> vertices;
 	std::vector <GLuint> indices;
 
+	bool hasBoxCollider;
+
 	AABB boxCollider;
 	GameObject* connectObject;
 
-	CollisionMesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, glm::mat4 transformMatrix, GameObject* connectedGO);
+	CollisionMesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, glm::mat4 transformMatrix, GameObject* connectedGO, bool hasBoxCollider);
 	void CheckRaycast(Raycast& ray);
 };
 

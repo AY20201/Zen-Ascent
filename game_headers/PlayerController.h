@@ -7,6 +7,9 @@
 #include"../engine_headers/CollisionSolver.h"
 #include"../engine_headers/Raycast.h"
 #include"../engine_headers/Camera.h"
+#include"../engine_headers/AudioPlayer.h"
+#include"../engine_headers/Transitioner.h"
+#include"Collectable.h"
 
 class PlayerController : public Behavior, public CollisionObject
 {
@@ -25,6 +28,7 @@ public:
 	bool isGrounded = false;
 
 	float jumpDelay = 0.5f;
+	float landingDelay = 0.25f;
 	float timeSinceLastJump;
 
 	float coyoteTime = 0.2f;

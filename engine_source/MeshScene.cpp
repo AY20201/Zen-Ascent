@@ -1,6 +1,6 @@
 #include"../engine_headers/MeshScene.h"
 
-MeshScene::MeshScene(Transform transform, Behavior* behavior, std::vector<const char*> lodFilenames, Shader& shader, Material* material)
+MeshScene::MeshScene(Transform transform, Behavior* behavior, std::vector<const char*> lodFilenames, Shader& shader, Material* material, bool separatedGOs, bool hasBoxColliders)
 {
 	MeshScene::transform = transform;
 	MeshScene::shader = shader;
@@ -11,16 +11,30 @@ MeshScene::MeshScene(Transform transform, Behavior* behavior, std::vector<const 
 		lodMeshes.push_back(std::vector<Mesh>{});
 		ImportMeshes(lodFilenames[i], i);
 	}
-
-	for (unsigned int i = 0; i < lodMeshes[lodMeshes.size() - 1].size(); i++)
+	if (!separatedGOs)
 	{
-		Mesh sceneMesh = lodMeshes[lodMeshes.size() - 1][i];
-		CollisionMesh newColMesh(sceneMesh.vertices, sceneMesh.indices, transform.matrix, sceneGameObject);
-		sceneCollisionMeshes.push_back(newColMesh);
-	}
+		GameObject* instantiatedGO = new GameObject(transform.position, transform.rotation, transform.scale, lodMeshes[0], behavior);
+		sceneGameObjects.push_back(instantiatedGO);
 
-	GameObject* instantiatedGO = new GameObject(transform.position, transform.rotation, transform.scale, lodMeshes[0], behavior);
-	sceneGameObject = instantiatedGO;
+		for (unsigned int i = 0; i < lodMeshes[lodMeshes.size() - 1].size(); i++)
+		{
+			Mesh sceneMesh = lodMeshes[lodMeshes.size() - 1][i];
+			CollisionMesh newColMesh(sceneMesh.vertices, sceneMesh.indices, transform.matrix, sceneGameObjects[0], hasBoxColliders);
+			sceneCollisionMeshes.push_back(newColMesh);
+		}
+	}
+	else
+	{
+		for (unsigned int i = 0; i < lodMeshes[0].size(); i++)
+		{
+			GameObject* instantiatedGO = new GameObject(transform.position, transform.rotation, transform.scale, lodMeshes[0][i], behavior);
+			sceneGameObjects.push_back(instantiatedGO);
+
+			Mesh sceneMesh = lodMeshes[lodMeshes.size() - 1][i];
+			CollisionMesh newColMesh(sceneMesh.vertices, sceneMesh.indices, transform.matrix, sceneGameObjects[i], hasBoxColliders);
+			sceneCollisionMeshes.push_back(newColMesh);
+		}
+	}
 }
 
 void MeshScene::ImportMeshes(const char* filename, unsigned int activeLod)
@@ -206,11 +220,16 @@ Texture* MeshScene::InitializeTexture(const aiMaterial* mat, aiTextureType type,
 
 void MeshScene::Clear()
 {
-	delete sceneGameObject;
+	for (int i = 0; i < sceneGameObjects.size(); i++)
+	{	
+		delete sceneGameObjects[i];
+	}
+	sceneGameObjects.clear();
 
 	for (unsigned int i = 0; i < sceneMaterials.size(); i++)
 	{
 		//sceneMaterials[i]->Clear();
 		delete sceneMaterials[i];
 	}
+	sceneMaterials.clear();
 }

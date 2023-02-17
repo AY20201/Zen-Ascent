@@ -54,20 +54,23 @@ glm::vec3 CollisionObject::CollideWithWorld(glm::vec3 currentVelocity, float mov
 
 	for (unsigned int i = 0; i < CollisionSolver::Instance.sceneCollisionMeshes.size(); i++)
 	{
-		AABB aabb = CollisionSolver::Instance.sceneCollisionMeshes[i].boxCollider;
-
-		if (lastCollision.extentsMax != aabb.extentsMax && lastCollision.extentsMin != aabb.extentsMin)
+		if (CollisionSolver::Instance.sceneCollisionMeshes[i].hasBoxCollider)
 		{
-			if (boxCollider.CollideWithAABB(aabb))
+			AABB aabb = CollisionSolver::Instance.sceneCollisionMeshes[i].boxCollider;
+
+			if (lastCollision.extentsMax != aabb.extentsMax && lastCollision.extentsMin != aabb.extentsMin)
 			{
-				newVelocityVector = boxCollider.GetNewVelocity(aabb, currentVelocity, vmv);
+				if (boxCollider.CollideWithAABB(aabb))
+				{
+					newVelocityVector = boxCollider.GetNewVelocity(aabb, currentVelocity, vmv);
 
-				glm::vec3 newPosition = position + newVelocityVector * movementSpeed * deltaTime;
+					glm::vec3 newPosition = position + newVelocityVector * movementSpeed * deltaTime;
 
-				boxCollider.TransformExtents(glm::translate(glm::mat4(1.0f), newPosition));
-				capsuleCollider.TransformExtents(glm::translate(glm::mat4(1.0f), newPosition));
+					boxCollider.TransformExtents(glm::translate(glm::mat4(1.0f), newPosition));
+					capsuleCollider.TransformExtents(glm::translate(glm::mat4(1.0f), newPosition));
 
-				return CollideWithWorld(newVelocityVector, movementSpeed, deltaTime, vmv, aabb);
+					return CollideWithWorld(newVelocityVector, movementSpeed, deltaTime, vmv, aabb);
+				}
 			}
 		}
 	}

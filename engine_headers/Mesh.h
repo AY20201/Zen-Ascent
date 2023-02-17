@@ -19,6 +19,7 @@ class Mesh
 		Material* material = new Material();
 
 		bool shadowCaster;
+		bool visible = true;
 
 		VAO vao;
 

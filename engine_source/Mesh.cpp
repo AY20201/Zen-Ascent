@@ -96,7 +96,7 @@ void Mesh::CalculateUVS()
 
 void Mesh::Draw(glm::mat4 matrix)
 {
-	if (vertices.size() > 0)
+	if (vertices.size() > 0 && visible)
 	{
 		material->shader.Activate();
 		vao.Bind();
@@ -110,7 +110,7 @@ void Mesh::Draw(glm::mat4 matrix)
 
 void Mesh::Draw(glm::mat4 matrix, Shader& shader)
 {
-	if (vertices.size() > 0)
+	if (vertices.size() > 0 && visible)
 	{
 		shader.Activate();
 		vao.Bind();

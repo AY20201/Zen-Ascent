@@ -17,7 +17,7 @@ FrameBufferObject::FrameBufferObject(int screenWidth, int screenHeight, int numC
 	{
 		TextureObject colTexObj = TextureObject{};
 		colorTextures.push_back(colTexObj);
-		AttachColorTexture(colorTextures[i], i, GL_RGBA16F, GL_UNSIGNED_BYTE);
+		AttachColorTexture(colorTextures[i], i, GL_RGBA16F, GL_FLOAT);
 	}
 
 	if (numColorTex == 0)
@@ -121,7 +121,7 @@ void FrameBufferObject::SetUpGBuffer()
 	TextureObject colTexObj3 = TextureObject{};
 	colorTextures.push_back(colTexObj3);
 
-	AttachColorTexture(colorTextures[3], 3, GL_RGBA, GL_UNSIGNED_BYTE);
+	AttachColorTexture(colorTextures[3], 3, GL_RGBA16F, GL_FLOAT);
 
 	TextureObject colTexObj4 = TextureObject{};
 	colorTextures.push_back(colTexObj4);

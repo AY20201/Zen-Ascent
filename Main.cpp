@@ -1,7 +1,16 @@
 #include<iostream>
 #include<fstream>
+
+//#include"imgui.h"
+//#include"imgui_impl_glfw.h"
+//#include"imgui_impl_opengl3.h"
+
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
+
+#define GLT_IMPLEMENTATION
+#define GLT_MANUAL_VIEWPORT
+#include<gltext/gltext.h>
 
 #include"engine_headers/GameObject.h"
 #include"engine_headers/Transform.h"
@@ -22,6 +31,9 @@
 #include"engine_headers/BloomRenderer.h"
 #include"engine_headers/SSAO.h"
 #include"engine_headers/ShadowChunker.h"
+#include"engine_headers/AudioPlayer.h"
+#include"engine_headers/GameSaver.h"
+#include"engine_headers/Transitioner.h"
 
 #include"game_headers/PlayerController.h"
 
@@ -112,6 +124,17 @@ int main()
 	//load opengl through glad
 	gladLoadGL();
 
+	gltInit(); //text library
+
+	/*
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 430");
+	*/
+
 	//compute shaders always first for easy binding in shaders
 	ComputeShader jitterComputeShader("engine_resource/Shaders/jitter.comp");
 	jitterComputeShader.AttachTexture(2048, 2048);
@@ -120,11 +143,12 @@ int main()
 	FrameBufferObject shadowMapFrameBuffer(2048, 2048, 1, 1);
 	FrameBufferObject gBufferFrameBuffer(width, height, 3, 1);
 	FrameBufferObject fogFrameBuffer(width, height, 1, 1);
-	FrameBufferObject ssaoFrameBuffer(width / 2, height / 2, 1, 1);
+	FrameBufferObject ssaoFrameBuffer(width / 3, height / 3, 1, 1);
 	FrameBufferObject blurFrameBuffer(width, height, 1, 1);
 	FrameBufferObject lightingFrameBuffer(width, height, 1, 1);
 	FrameBufferObject basePostFrameBuffer(width, height);
 	FrameBufferObject finalPassFrameBuffer(width, height, 1, 1);
+	FrameBufferObject transitionFrameBuffer(width, height, 1, 1);
 	basePostFrameBuffer.SetUpGBuffer();
 	basePostFrameBuffer.InitializeRenderQuad();
 
@@ -137,11 +161,11 @@ int main()
 	Texture* defaultAlbedo = new Texture("engine_resource/Textures/default_albedo.png", GL_TEXTURE_2D, GL_LINEAR, /*1,*/ GL_RGB, GL_UNSIGNED_BYTE);
 	Texture* defaultNormalMap = new Texture("engine_resource/Textures/default_normal.png", GL_TEXTURE_2D, GL_LINEAR, /*1,*/ GL_RGB, GL_UNSIGNED_BYTE);
 	//Texture* defaultSpecMap = new Texture("engine_resource/Textures/default_albedo.png", GL_TEXTURE_2D, GL_LINEAR, /*1,*/ GL_RGB, GL_UNSIGNED_BYTE);
-
+	
 	Texture::defaultAlbedo = defaultAlbedo;
 	Texture::defaultNormalMap = defaultNormalMap;
 	//Texture::defaultSpecMap = defaultSpecMap;
-	
+
 	Texture* brickTexture = new Texture("engine_resource/Textures/marble_herringbone_albedo.png", GL_TEXTURE_2D, GL_LINEAR, /*0,*/ GL_RGB, GL_UNSIGNED_BYTE);
 	Texture* normalMap = new Texture("engine_resource/Textures/marble_herringbone_normal.png", GL_TEXTURE_2D, GL_LINEAR, /*1,*/ GL_RGB, GL_UNSIGNED_BYTE);
 	//Texture* marbleSpecMap = new Texture("engine_resource/Textures/marble_herringbone_roughness.png", GL_TEXTURE_2D, GL_LINEAR, /*1,*/ GL_RGB, GL_UNSIGNED_BYTE);
@@ -154,6 +178,7 @@ int main()
 	Shader fogShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/fog.frag");
 	Shader ssaoShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/ssao.frag");
 	Shader blurShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/blur.frag");
+	Shader transitionShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/transition.frag");
 	Shader basePostShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/basepostprocesser.frag");
 	Shader lightingShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/lighting.frag");
 	Shader tonemapperShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/tonemapper.frag");
@@ -163,6 +188,17 @@ int main()
 	Shader bloomUpsampleShaderProgram("engine_resource/Shaders/postprocess.vert", "engine_resource/Shaders/upsampler.frag");
 
 	//Shader waterShader("engine_resource/Shaders/water.vert", "engine_resource/Shaders/water.frag");
+
+	Transitioner::Instance.InitializeTransitions(std::vector<const char*>{ 
+		"engine_resource/Textures/transitions/transition_up_down.png",
+		"engine_resource/Textures/transitions/transition_swipe_up_right.png",
+		"engine_resource/Textures/transitions/transition_swipe_down_right.png",
+		"engine_resource/Textures/transitions/transition_swipe_right.png",
+		"engine_resource/Textures/transitions/transition_swipe_down_left.png",
+		"engine_resource/Textures/transitions/transition_swipe_up_left.png",
+		"engine_resource/Textures/transitions/transition_swipe_left.png"
+	}, transitionShaderProgram, 3.0f);
+	Transitioner::Instance.SetTransition(0, false);
 
 	std::vector <Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
 	std::vector <GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
@@ -217,38 +253,72 @@ int main()
 	Transform defaultTransform(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 	
 	//MeshScene importedCube(Transform(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0f), glm::vec3(0.25f)), "engine_resource/3D Objects/cube/cube.obj", shaderProgram, nullptr);
-	MeshScene importedMonkey(Transform(glm::vec3(-1.0f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec3(0.35f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/textured_monkey/monkey.obj", "engine_resource/3D Objects/textured_monkey/monkey_lod_1.obj" }, shaderProgram, nullptr);
-	MeshScene importedDonut(Transform(glm::vec3(-2.5f, 0.25f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/colored_donut/colored_donut.obj", "engine_resource/3D Objects/colored_donut/colored_donut_lod_1.obj" }, shaderProgram, nullptr);
+	MeshScene importedMonkey(Transform(glm::vec3(-1.0f, 0.5f, 0.0f), glm::vec3(0.0f), glm::vec3(0.35f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/textured_monkey/monkey.obj", "engine_resource/3D Objects/textured_monkey/monkey_lod_1.obj" }, shaderProgram, nullptr, false, true);
+	MeshScene importedDonut(Transform(glm::vec3(-2.5f, 0.25f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/colored_donut/colored_donut.obj", "engine_resource/3D Objects/colored_donut/colored_donut_lod_1.obj" }, shaderProgram, nullptr, false, true);
 	
-	MeshScene walls(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/walls/walls1.obj" }, glassShaderProgram, glass);
-	MeshScene floor1(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor1/floor1.obj" }, shaderProgram, nullptr);
-	MeshScene floor2(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor2/floor2.obj" }, shaderProgram, nullptr);
-	MeshScene floor3(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor3/floor3.obj" }, shaderProgram, nullptr);
-	MeshScene floor4(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor4/floor4.obj" }, shaderProgram, nullptr);
-	MeshScene floor5(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor5/floor5.obj" }, shaderProgram, nullptr);
-	MeshScene floor6(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor6/floor6.obj" }, shaderProgram, nullptr);
-	MeshScene floor7(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor7/floor7.obj" }, shaderProgram, nullptr);
-	MeshScene floor8(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor8/floor8.obj" }, shaderProgram, nullptr);
-	MeshScene floor9(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor9/floor9.obj" }, shaderProgram, nullptr);
+	MeshScene walls(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/walls/walls1.obj" }, glassShaderProgram, glass, false, true);
+	MeshScene floor1(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor1/floor1.obj" }, shaderProgram, nullptr, false, true);
+	MeshScene floor2(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor2/floor2.obj" }, shaderProgram, nullptr, false, true);
+	MeshScene floor3(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor3/floor3.obj" }, shaderProgram, nullptr, false, true);
+	MeshScene floor4(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor4/floor4.obj" }, shaderProgram, nullptr, false, true);
+	MeshScene floor5(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor5/floor5.obj" }, shaderProgram, nullptr, false, true);
+	MeshScene floor6(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor6/floor6.obj" }, shaderProgram, nullptr, false, true);
+	MeshScene floor7(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor7/floor7.obj" }, shaderProgram, nullptr, false, true);
+	MeshScene floor8(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor8/floor8.obj" }, shaderProgram, nullptr, false, true);
+	MeshScene floor9(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor9/floor9.obj" }, shaderProgram, nullptr, false, true);
+	MeshScene floor10(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor10/floor10.obj" }, shaderProgram, nullptr, false, true);
+	MeshScene floor11(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/floor11/floor11.obj" }, shaderProgram, nullptr, false, true);
 
-	glm::vec3 loadPlayerPos;
-	//glm::vec3 loadCamOrientation;
-	std::ifstream testLoad("engine_resource/Save Games/testsave1.txt");
+	MeshScene challenge(Transform(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f)), nullptr, std::vector<const char*>{ "engine_resource/3D Objects/tower/challenge/challenge.obj" }, glassShaderProgram, glass, false, true);
+	
+	Collectable* collectableBh1 = new Collectable(false, 70.0f);
+	Collectable* collectableBh2 = new Collectable(false, 70.0f);
+	Collectable* collectableBh3 = new Collectable(false, 70.0f);
+	Collectable* collectableBh4 = new Collectable(false, 70.0f);
+	Collectable* collectableBh5 = new Collectable(false, 70.0f);
+	Collectable* collectableBh6 = new Collectable(false, 70.0f);
 
-	testLoad >> loadPlayerPos.x >> loadPlayerPos.y >> loadPlayerPos.z;
-	//testLoad >> loadCamOrientation.x >> loadCamOrientation.y >> loadCamOrientation.z;
+	glm::vec3 loadPlayerPos = glm::vec3(1.0f, 2.0f, 1.0f);
 
-	//camera.Orientation = loadCamOrientation;
+	std::ofstream("engine_resource/Save Games/save1.txt", std::ios::binary | std::ios::app); //create file
 
+	std::ifstream inputSave;
+	inputSave.open("engine_resource/Save Games/save1.txt", std::ios::binary);
+
+	inputSave.seekg(0, inputSave.end);
+	std::streamoff length = inputSave.tellg();
+
+	inputSave.seekg(0, std::ios::beg);
+	
+	if (length == 18)
+	{
+		GameSaver::Load(inputSave, &loadPlayerPos);
+		GameSaver::Load(inputSave, &collectableBh1->isCollected);
+		GameSaver::Load(inputSave, &collectableBh2->isCollected);
+		GameSaver::Load(inputSave, &collectableBh3->isCollected);
+		GameSaver::Load(inputSave, &collectableBh4->isCollected);
+		GameSaver::Load(inputSave, &collectableBh5->isCollected);
+		GameSaver::Load(inputSave, &collectableBh6->isCollected);
+	}
+
+	inputSave.close();
+
+	MeshScene collectable1(Transform(glm::vec3(4.1f, 10.8f, 5.4f), glm::vec3(0.0f), glm::vec3(1.0f)), collectableBh1, std::vector<const char*>{ "engine_resource/3D Objects/tower/collectables/collectable.obj", "engine_resource/3D Objects/tower/collectables/collectable_lod.obj" }, shaderProgram, nullptr, false, false);
+	MeshScene collectable2(Transform(glm::vec3(9.3f, 26.9f, 8.9f), glm::vec3(0.0f), glm::vec3(1.0f)), collectableBh2, std::vector<const char*>{ "engine_resource/3D Objects/tower/collectables/collectable.obj", "engine_resource/3D Objects/tower/collectables/collectable_lod.obj" }, shaderProgram, nullptr, false, false);
+	MeshScene collectable3(Transform(glm::vec3(0.7f, 32.5f, 11.5f), glm::vec3(0.0f), glm::vec3(1.0f)), collectableBh3, std::vector<const char*>{ "engine_resource/3D Objects/tower/collectables/collectable.obj", "engine_resource/3D Objects/tower/collectables/collectable_lod.obj" }, shaderProgram, nullptr, false, false);
+	MeshScene collectable4(Transform(glm::vec3(-1.9f, 42.2f, 2.3f), glm::vec3(0.0f), glm::vec3(1.0f)), collectableBh4, std::vector<const char*>{ "engine_resource/3D Objects/tower/collectables/collectable.obj", "engine_resource/3D Objects/tower/collectables/collectable_lod.obj" }, shaderProgram, nullptr, false, false);
+	MeshScene collectable5(Transform(glm::vec3(0.4f, 45.6f, 1.2f), glm::vec3(0.0f), glm::vec3(1.0f)), collectableBh6, std::vector<const char*>{ "engine_resource/3D Objects/tower/collectables/collectable.obj", "engine_resource/3D Objects/tower/collectables/collectable_lod.obj" }, shaderProgram, nullptr, false, false);
+	MeshScene collectable6(Transform(glm::vec3(11.8f, 54.4f, 5.1f), glm::vec3(0.0f), glm::vec3(1.0f)), collectableBh5, std::vector<const char*>{ "engine_resource/3D Objects/tower/collectables/collectable.obj", "engine_resource/3D Objects/tower/collectables/collectable_lod.obj" }, shaderProgram, nullptr, false, false);
+	
 	//std::cout << loadPlayerPos.x << " " << loadPlayerPos.y << " " << loadPlayerPos.z;
 
 	GameObject smallPyramid(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), pyramid, nullptr);
 	GameObject planeObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), plane.mesh, nullptr);
 	PlayerController* playerController = new PlayerController(2.0f, 0.6f, &camera, glm::vec3(0.35f, 0.7f, 0.35f));
-	GameObject player(/*glm::vec3(loadPlayerPos.x, loadPlayerPos.y + 0.1f, loadPlayerPos.z)*/glm::vec3(1.0f, 2.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f), Mesh(), playerController);
+	GameObject player(glm::vec3(loadPlayerPos.x, loadPlayerPos.y + 0.25f, loadPlayerPos.z), glm::vec3(0.0f), glm::vec3(1.0f), Mesh(), playerController);
 	
-	CollisionMesh pyramidCollider(verts, ind, smallPyramid.transform.matrix, &smallPyramid);
-	CollisionMesh planeCollider(plane.mesh.vertices, plane.mesh.indices, planeObject.transform.matrix, &planeObject);
+	CollisionMesh pyramidCollider(verts, ind, smallPyramid.transform.matrix, &smallPyramid, true);
+	CollisionMesh planeCollider(plane.mesh.vertices, plane.mesh.indices, planeObject.transform.matrix, &planeObject, true);
 
 	ShadowChunker shadowChunker(0.5f);
 	ssaoRenderer.InitializeKernels();
@@ -258,6 +328,11 @@ int main()
 
 	//lighting shader
 	LightHandler::Instance.SetLightUniforms(lightingShaderProgram);
+
+	//Audio player
+	AudioPlayer::Instance.InitializeSoundEngine();
+
+	//AudioPlayer::Instance.Play3DSound("engine_resource/Sound/landing_placeholder.wav", glm::vec3(0.0f), 2.5f, true);
 
 	double currentTime = glfwGetTime();
 	double previousTime = glfwGetTime();
@@ -272,6 +347,13 @@ int main()
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		//overwrite front buffer with back buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		/*
+		//create new imgui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		*/
 
 		//calculate deltaTime
 		currentTime = glfwGetTime();
@@ -417,6 +499,8 @@ int main()
 		//
 
 		bloomRenderer.RenderBloomTexture(bloomUpsampleShaderProgram, bloomDownsampleShaderProgram, fogFrameBuffer.colorTextures[0].textureID, fogFrameBuffer.colorTextures[0].textureUnit, 0.005f);
+
+		transitionFrameBuffer.BindFrameBuffer();
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 		tonemapperShaderProgram.Activate();
@@ -431,14 +515,35 @@ int main()
 
 		basePostFrameBuffer.RenderQuad(tonemapperShaderProgram);
 
-		//CollisionSolver::Instance.UpdateWorldCollisions((PlayerController*)player.behavior);
+		/*
+		GLTtext* text = gltCreateText();
+		gltSetText(text, "Hello World!");
 
-		//pyramidCollider.CheckAllTriangles((PlayerController*)player.behavior);
-		//tonemapperFrameBuffer.UnbindFrameBuffer();
+		gltBeginDraw();
+		gltColor(1.0f, 1.0f, 1.0f, 1.0f);
+		gltDrawText2DAligned(text, 500.0f, 500.0f, 1, GLT_CENTER, GLT_BOTTOM);
 		
-		//tonemapperShaderProgram.Activate();
-		//tonemapperFrameBuffer.SetTexture(tonemapperFrameBuffer.colorTexture, tonemapperShaderProgram, "renderedScene");
-		//tonemapperFrameBuffer.RenderQuad(tonemapperShaderProgram);
+		gltEndDraw();
+		gltDeleteText(text);
+		*/
+
+		transitionFrameBuffer.UnbindFrameBuffer();
+
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+		Transitioner::Instance.Update(deltaTime);
+		basePostFrameBuffer.SetTexture(transitionFrameBuffer.colorTextures[0], transitionShaderProgram, "renderedScene");
+		basePostFrameBuffer.RenderQuad(transitionShaderProgram);
+
+
+		/*
+		ImGui::Begin("This is a new window");
+		ImGui::Text("Hello World");
+		ImGui::End();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		*/
 
 		//std::cout << 1.0f / deltaTime << std::endl;
 
@@ -449,11 +554,58 @@ int main()
 	}
 
 	//save game
-	std::ofstream testSave("engine_resource/Save Games/testsave1.txt");
-	testSave << player.transform.position.x << " " << player.transform.position.y << " " << player.transform.position.z << std::endl;
+	std::ofstream outputSave;
+	outputSave.open("engine_resource/Save Games/save1.txt", std::ios::binary);
+
+	GameSaver::Save(outputSave, player.transform.position);
+	GameSaver::Save(outputSave, collectableBh1->isCollected);
+	GameSaver::Save(outputSave, collectableBh2->isCollected);
+	GameSaver::Save(outputSave, collectableBh3->isCollected);
+	GameSaver::Save(outputSave, collectableBh4->isCollected);
+	GameSaver::Save(outputSave, collectableBh5->isCollected);
+	GameSaver::Save(outputSave, collectableBh6->isCollected);
+
+	outputSave.close();
+
+	//testSave << player.transform.position.x << " " << player.transform.position.y << " " << player.transform.position.z << std::endl;
 	//testSave << camera.Orientation.x << " " << camera.Orientation.y << " " << camera.Orientation.z;
 
+	/*
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+	*/
+
+	AudioPlayer::Instance.soundEngine->drop();
 	//importedCube.Clear();
+	walls.Clear();
+	floor1.Clear();
+	floor2.Clear();
+	floor3.Clear();
+	floor4.Clear();
+	floor5.Clear();
+	floor6.Clear();
+	floor7.Clear();
+	floor8.Clear();
+	floor9.Clear();
+	floor10.Clear();
+
+	challenge.Clear();
+
+	delete collectableBh1;
+	delete collectableBh2;
+	delete collectableBh3;
+	delete collectableBh4;
+	delete collectableBh5;
+	delete collectableBh6;
+
+	collectable1.Clear();
+	collectable2.Clear();
+	collectable3.Clear();
+	collectable4.Clear();
+	collectable5.Clear();
+	collectable6.Clear();
+
 	importedMonkey.Clear();
 	importedDonut.Clear();
 
@@ -470,6 +622,8 @@ int main()
 	delete defaultAlbedo;
 	delete defaultNormalMap;
 	
+	Transitioner::Instance.DeleteTransitions();
+
 	delete brickTexture;
 	delete normalMap;
 
@@ -477,6 +631,8 @@ int main()
 
 	//ObjectHandler::Instance.Delete();
 	//delete waterMaterial;
+
+	gltTerminate(); //text library
 
 	glfwTerminate();
 	return 0;

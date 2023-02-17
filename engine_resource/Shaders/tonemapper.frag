@@ -6,7 +6,7 @@ in vec2 texCoord;
 uniform sampler2D renderedScene;
 uniform sampler2D bloomBlur;
 
-float bloomStrength = 0.04;
+float bloomStrength = 0.05;
 float exposure = 1.5;
 float gamma = 0.7;
 
@@ -18,6 +18,7 @@ void main()
 
 	vec3 mapped = vec3(1.0) - exp(-col * exposure);
 	mapped = pow(mapped, vec3(1.0 / gamma));
+
 
 	FragColor = vec4(mapped, 1.0);
 }

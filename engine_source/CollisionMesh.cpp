@@ -2,7 +2,7 @@
 #include"../engine_headers/CollisionSolver.h"
 #include"../engine_headers/GameObject.h"
 
-CollisionMesh::CollisionMesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, glm::mat4 transformMatrix, GameObject* connectedGO)
+CollisionMesh::CollisionMesh(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, glm::mat4 transformMatrix, GameObject* connectedGO, bool hasBoxCollider)
 {
 	CollisionMesh::vertices = vertices;
 
@@ -14,15 +14,19 @@ CollisionMesh::CollisionMesh(std::vector<Vertex>& vertices, std::vector<GLuint>&
 
 			CollisionMesh::vertices[i].position = glm::vec3(transformMatrix * glm::vec4(v.position.x, v.position.y, v.position.z, 1.0f));
 			CollisionMesh::vertices[i].texcoord = glm::vec2(v.texcoord.x, v.texcoord.y);
-			CollisionMesh::vertices[i].normal = glm::mat3(glm::transpose(glm::inverse(transformMatrix))) * glm::vec3(v.normal.x, v.normal.y, v.normal.z);
+			CollisionMesh::vertices[i].normal = glm::vec3(v.normal.x, v.normal.y, v.normal.z);
 			CollisionMesh::vertices[i].tangent = glm::vec3(v.tangent.x, v.tangent.y, v.tangent.z);
 		}
 	}
 
 	CollisionMesh::indices = indices;
 	CollisionMesh::connectObject = connectedGO;
+	CollisionMesh::hasBoxCollider = hasBoxCollider;
 
-	boxCollider = AABB(vertices, transformMatrix);
+	if (hasBoxCollider)
+	{
+		boxCollider = AABB(vertices, transformMatrix);
+	}
 	//boxCollider.RecalculateAABB(vertices, transformMatrix);
 
 	CollisionSolver::Instance.sceneCollisionMeshes.push_back(*this);
@@ -48,11 +52,11 @@ void CollisionMesh::CheckRaycast(Raycast& ray)
 	{
 		if (!ray.foundCollision)
 		{
-			Vertex& v0 = vertices[indices[i]];
-			Vertex& v1 = vertices[indices[i + 1]];
-			Vertex& v2 = vertices[indices[i + 2]];
+			glm::vec3 v0 = vertices[indices[i]].position;
+			glm::vec3 v1 = vertices[indices[i + 1]].position;
+			glm::vec3 v2 = vertices[indices[i + 2]].position;
 
-			ray.CheckRayTriangleCollision(10.0f, v0.position, v1.position, v2.position);
+			ray.CheckRayTriangleCollision(v0, v1, v2);
 			if (ray.foundCollision)
 			{
 				ray.hitObject = connectObject;
