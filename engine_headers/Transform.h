@@ -9,6 +9,8 @@ class Transform
 {
 	public:
 
+		static Transform Zero;
+
 		glm::mat4 matrix = glm::mat4(1.0);
 
 		glm::vec3 position;

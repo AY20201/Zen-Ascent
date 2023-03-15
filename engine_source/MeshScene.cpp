@@ -1,10 +1,12 @@
 #include"../engine_headers/MeshScene.h"
 
-MeshScene::MeshScene(Transform transform, Behavior* behavior, std::vector<const char*> lodFilenames, Shader& shader, Material* material, bool separatedGOs, bool hasBoxColliders)
+MeshScene::MeshScene(Transform transform, Behavior* behavior, std::vector<const char*> lodFilenames, Shader& shader, Material* material, bool separatedGOs, bool hasBoxColliders, bool hasUVs)
 {
 	MeshScene::transform = transform;
 	MeshScene::shader = shader;
 	MeshScene::material = material;
+
+	MeshScene::hasUVs = hasUVs;
 
 	for (unsigned int i = 0; i < lodFilenames.size(); i++)
 	{
@@ -132,7 +134,7 @@ void MeshScene::InitializeMesh(unsigned int activeLod, const aiMesh* mesh, Mater
 		indices.push_back(face.mIndices[2]);
 	}
 
-	Mesh newMesh(vertices, indices, material, true, false, true);
+	Mesh newMesh(vertices, indices, material, true, hasUVs, true);
 	lodMeshes[activeLod].push_back(newMesh);
 }
 /*

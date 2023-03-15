@@ -6,6 +6,12 @@ PlayerController::PlayerController(float movementSpeed, float height, Camera* ca
 	PlayerController::movementSpeed = movementSpeed;
 	PlayerController::height = height;
 	PlayerController::camera = camera;
+
+	timeSinceLastJump = 0.0f;
+	timeLastGrounded = 0.0f;
+	elaspedTime = 0.0f;
+	collectablesPickedUp = 0;
+	initialJumpVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
 }
 
 void PlayerController::Awake()
@@ -86,7 +92,7 @@ void PlayerController::Update(float deltaTime, GLFWwindow* window)
 
 			if (timeLastGrounded != elaspedTime - deltaTime && elaspedTime - timeLastGrounded > landingDelay)
 			{
-				//AudioPlayer::Instance.Play3DSound("engine_resource/Sound/landing_placeholder.wav", position, 0.5f, false);
+				AudioPlayer::Instance.Play3DSound("../../engine_resource/Sound/soundeffects/landing.wav", parentObj->transform.position, 1.0f, 2.0f, false);
 			}
 
 			timeLastGrounded = elaspedTime;
@@ -98,7 +104,6 @@ void PlayerController::Update(float deltaTime, GLFWwindow* window)
 			timeSinceLastJump = 0.0f;
 
 			//play audio
-			//AudioPlayer::Instance.Play2DSound("engine_resource/Sound/test_noise.wav", false);
 		}
 
 		//clamp velocity
@@ -140,6 +145,7 @@ void PlayerController::Update(float deltaTime, GLFWwindow* window)
 				parentObj->transform.position = glm::vec3(1.0f, 2.0f, 1.0f);
 				velocity.y = 0.0f;
 				verticalMovementVector = glm::vec3(0.0f);
+				camera->Orientation = glm::vec3(0.74f, 0.1f, 0.66f);
 			}
 		}
 
@@ -152,10 +158,10 @@ void PlayerController::Update(float deltaTime, GLFWwindow* window)
 		if (ray.hitObject != nullptr)
 		{
 			Collectable* collectable = dynamic_cast<Collectable*>(ray.hitObject->behavior);
-			if (collectable != nullptr)
+			if (collectable != nullptr && !collectable->isCollected)
 			{
 				collectable->Collect();
-
+				collectablesPickedUp += 1;
 				//delete collectable;
 			}
 		}
@@ -182,5 +188,5 @@ void PlayerController::Update(float deltaTime, GLFWwindow* window)
 	}
 	
 	parentObj->transform.RecalculateMatrix();
-	boxCollider.TransformExtents(parentObj->transform.matrix); 
+	boxCollider.TransformExtents(parentObj->transform.matrix);
 }

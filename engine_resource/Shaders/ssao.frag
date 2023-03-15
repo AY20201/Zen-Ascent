@@ -18,18 +18,19 @@ float farPlane = 100.0;
 
 float radius = 0.125;
 
-vec3 VSPositionFromDepth(vec2 tCoord, float depthSample)
+/*
+float CalculateViewZ(vec2 tCoord)
 {
-	float x = tCoord.x * 2.0 - 1.0;
-	float y = (1.0 - tCoord.y) * 2.0 - 1.0;
-	vec4 projectedPos = vec4(x, y, depthSample, 1.0);
-	vec4 viewSpacePosition = inverse(projection) * projectedPos;
-	return viewSpacePosition.xyz / viewSpacePosition.w;
+	float depth = texture(gDepth, tCoord).x;
+	float viewZ = projection[3][2] / (2.0 * depth - 1.0 - projection[2][2]);
+	return viewZ;
 }
+*/
 
 void main()
 {
 	vec3 currentPos = texture(gViewSpacePosition, texCoord).xyz;
+
 	vec3 normal = mat3(transpose(inverse(view))) * texture(gNormal, texCoord).rgb;
 	vec3 randomVec = texture(noiseTexture, texCoord * noiseScale).xyz;
 

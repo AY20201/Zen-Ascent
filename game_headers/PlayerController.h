@@ -28,18 +28,20 @@ public:
 	bool isGrounded = false;
 
 	float jumpDelay = 0.5f;
-	float landingDelay = 0.25f;
-	float timeSinceLastJump;
+	float landingDelay = 0.3f;
+	float timeSinceLastJump = 0.0f;
 
 	float coyoteTime = 0.2f;
-	float timeLastGrounded;
-	float elaspedTime;
+	float timeLastGrounded = 0.0f;
+	float elaspedTime = 0.0f;
 
-	glm::vec3 initialJumpVelocity;
+	glm::vec3 initialJumpVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	float damping = 1.0f;
 
-	Raycast ray;
+	int collectablesPickedUp = 0;
+
+	Raycast ray = Raycast();
 	//glm::vec3 startingPosition;
 
 	PlayerController(float movementSpeed, float height, Camera* camera, glm::vec3 boxDimensions);

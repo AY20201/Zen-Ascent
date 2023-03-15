@@ -18,7 +18,7 @@ class Mesh
 		std::vector <GLuint> indices;
 		Material* material = new Material();
 
-		bool shadowCaster;
+		bool shadowCaster = true;
 		bool visible = true;
 
 		VAO vao;

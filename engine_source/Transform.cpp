@@ -1,5 +1,7 @@
 #include "../engine_headers/Transform.h"
 
+Transform Transform::Zero(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
+
 Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
 {
 	Transform::position = position;

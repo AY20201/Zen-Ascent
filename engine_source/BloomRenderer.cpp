@@ -125,7 +125,7 @@ void BloomRenderer::RenderUpsamples(Shader& upsampleShader, GLuint sourceTexture
 	glBlendFunc(GL_ONE, GL_ONE);
 	glBlendEquation(GL_FUNC_ADD);
 
-	for (unsigned int i = mipChain.size() - 1; i > 0; i--)
+	for (int i = static_cast<int>(mipChain.size()) - 1; i > 0; i--)
 	{
 		MipTex& mip = mipChain[i];
 		MipTex& nextMip = mipChain[i - 1];

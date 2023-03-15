@@ -179,7 +179,7 @@ void main()
 	float sceneAmbience = avgSceneLum * ambientFactor;
 
 	vec3 lightResult = vec3(0, 0, 0);
-	float shadowBias = 0.0001;
+	float shadowBias = 0.0005;
 	float shadow = 0.0;
 
 	for(int i = 0; i < numDirLights; i++) {

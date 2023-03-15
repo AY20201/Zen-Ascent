@@ -10,7 +10,7 @@ class GameObject;
 class Behavior
 {
 public:
-	GameObject* parentObj;
+	GameObject* parentObj = nullptr;
 
 	void Initialize(GameObject* parentObj);
 	virtual void Awake();

@@ -52,8 +52,7 @@ void Collectable::Update(float deltaTime, GLFWwindow* window)
 void Collectable::Collect()
 {
 	//assumes one mesh
-	if (!isCollected)
-	{
-		isCollected = true;
-	}
+
+	isCollected = true;
+	
 }

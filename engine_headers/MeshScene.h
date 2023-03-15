@@ -23,7 +23,7 @@ class MeshScene
 		Shader shader;
 		Material* material;
 
-		MeshScene(Transform transform, Behavior* behavior, std::vector<const char*> lodFilenames, Shader& shader, Material* material, bool separatedGOs, bool hasBoxColliders);
+		MeshScene(Transform transform, Behavior* behavior, std::vector<const char*> lodFilenames, Shader& shader, Material* material, bool separatedGOs, bool hasBoxColliders, bool hasUVs = false);
 		void ImportMeshes(const char* filename, unsigned int activeLod);
 		void Clear();
 
@@ -31,6 +31,8 @@ class MeshScene
 		//void ImportCollisionMeshes();
 
 	private:
+
+		bool hasUVs = false;
 
 		void InitializeMesh(unsigned int activeLod, const aiMesh* mesh, Material* material);
 		void InitializeMaterials(const aiScene* scene, const std::string& filename);

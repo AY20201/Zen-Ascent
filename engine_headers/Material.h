@@ -9,10 +9,10 @@
 
 struct TexParam
 {
-	const char* uniformName;
-	Texture* tex;
-	float scale;
-	glm::vec3 color = glm::vec3(1, 1, 1);
+	const char* uniformName = "";
+	Texture* tex = nullptr;
+	float scale = 1.0f;
+	glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 
 	bool Empty()
 	{
@@ -24,12 +24,12 @@ class Material
 {
 	public:
 
-		Shader shader;
+		Shader shader = Shader();
 		
 		TexParam albedo;
 		TexParam normalMap;
 		//TexParam specMap;
-		bool transparent;
+		bool transparent = false;
 
 		Material(Shader& shader, TexParam albedo, TexParam normalMap, bool transparent/*, TexParam specMap*/);
 		Material() = default;
