@@ -81,16 +81,16 @@ void Mesh::CalculateUVS()
 			glm::vec2 newUV = glm::vec2(vert.position.y, vert.position.z);
 			vertices[i].texcoord = newUV;
 		}
-		
+
 		else if (norm == glm::vec3(0.0f, 0.0f, 1.0f)
 			|| norm == glm::vec3(0.0f, 0.0f, -1.0f))
 		{
 			glm::vec2 newUV = glm::vec2(vert.position.x, vert.position.y);
 			vertices[i].texcoord = newUV;
 		}
-			
 
-		
+
+
 	}
 }
 
@@ -117,7 +117,7 @@ void Mesh::Draw(glm::mat4 matrix, Shader& shader)
 
 		//material->SetTextures();
 		glUniformMatrix4fv(glGetUniformLocation(shader.ID, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(matrix));
-
+		
 		glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, (void*)0);
 	}
 }

@@ -51,16 +51,18 @@ void AudioPlayer::Play3DSound(const char* filename, glm::vec3 position, float mi
 
 void AudioPlayer::PlaySoundtrack(int soundtrack, bool random)
 {
-	int randSoundtrack = 0;
+	int randSoundtrack = rand() % (int)soundtracks.size();
 	if (random)
 	{
-		while (randSoundtrack == currentSoundtrackIndex)
+		while (std::count(lastTwoPlayedSounds.begin(), lastTwoPlayedSounds.end(), randSoundtrack) != 0)
 		{
 			randSoundtrack = rand() % (int)soundtracks.size();
 		}
 	}
 
 	int soundtrackIndex = random ? randSoundtrack : soundtrack;
+	lastTwoPlayedSounds.push_front(soundtrackIndex);
+	lastTwoPlayedSounds.pop_back();
 
 	irrklang::ISound* sound = soundEngine->play2D(soundtracks[soundtrackIndex].filename, false, false, true);
 

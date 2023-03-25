@@ -102,6 +102,8 @@ void Camera::Look(GLFWwindow* window)
 			//firstClick = false;
 		//}
 
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
 	double mouseX, mouseY;
 	glfwGetCursorPos(window, &mouseX, &mouseY);
 

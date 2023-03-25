@@ -95,12 +95,15 @@
     <ClInclude Include="engine_headers\VBO.h" />
     <ClInclude Include="game_headers\Collectable.h" />
     <ClInclude Include="game_headers\PlayerController.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="brick.png" />
     <Image Include="brick_2.jpg" />
     <Image Include="brick_2_normal_map.jpg" />
     <Image Include="brick_normal_map.png" />
+    <Image Include="engine_resource\Textures\icons\desktop_icon.ico" />
+    <Image Include="engine_resource\Textures\icons\desktop_icon.png" />
     <Image Include="engine_resource\Textures\marble_herringbone_albedo.png" />
     <Image Include="engine_resource\Textures\marble_herringbone_normal.png" />
     <Image Include="normal_map_test.png" />
@@ -136,12 +139,16 @@
     <None Include="engine_resource\Shaders\water.frag" />
     <None Include="engine_resource\Shaders\water.vert" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Zen Ascent.rc" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{219a3f76-9533-49ed-8623-5a6a1bb23d2a}</ProjectGuid>
-    <RootNamespace>Project2</RootNamespace>
+    <RootNamespace>Zen Ascent</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Zen Ascent</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -238,7 +245,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -276,7 +283,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>

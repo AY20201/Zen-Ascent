@@ -102,8 +102,6 @@ void PlayerController::Update(float deltaTime, GLFWwindow* window)
 		{
 			verticalMovementVector = initialJumpVelocity;
 			timeSinceLastJump = 0.0f;
-
-			//play audio
 		}
 
 		//clamp velocity
@@ -147,6 +145,11 @@ void PlayerController::Update(float deltaTime, GLFWwindow* window)
 				verticalMovementVector = glm::vec3(0.0f);
 				camera->Orientation = glm::vec3(0.74f, 0.1f, 0.66f);
 			}
+		}
+		else if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE)
+		{
+			Transitioner::Instance.inTransitionStart = false;
+			Transitioner::Instance.inTransitionEnd = true;
 		}
 
 		ray.origin = parentObj->transform.position + glm::vec3(0.0f, height / 2.0f, 0.0f);

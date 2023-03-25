@@ -3,6 +3,7 @@
 
 #include<iostream>
 #include<vector>
+#include<deque>
 
 #include<irrKlang/irrKlang.h>
 #include"Transform.h"
@@ -20,6 +21,7 @@ class AudioPlayer
 
 		std::vector<Soundtrack> soundtracks;
 		std::vector<irrklang::ISound*> loopedSounds;
+		std::deque<int> lastTwoPlayedSounds { -1, -2 };
 
 		irrklang::ISoundEngine* soundEngine;
 

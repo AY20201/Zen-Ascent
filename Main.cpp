@@ -1,6 +1,7 @@
 #include<iostream>
 #include<fstream>
 
+#include<Windows.h>
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 
@@ -38,7 +39,11 @@
 	0.5f, -0.5f, 0.0f,	1.0f, 1.0f, 1.0f  // Lower right corner
 };*/
 
-
+extern "C" {
+	_declspec(dllexport) DWORD NvOptimusEnablement = 1;
+	_declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+/*
 Vertex vertices[] =
 {
 	Vertex{glm::vec3(-0.5f, 0.0f,  0.5f), glm::vec2(0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)}, // Bottom side
@@ -78,10 +83,12 @@ GLuint indices[] =
 
 glm::vec3 modelPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
+*/
+
 float nearClipPlane = 0.1f;
 float farClipPlane = 100.0f;
 
-int main()
+int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nCmdShow)
 {
 	glfwInit();
 
@@ -185,9 +192,6 @@ int main()
 	}, transitionShaderProgram, 3.0f);
 	Transitioner::Instance.SetTransition(0, false);
 
-	std::vector <Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
-	std::vector <GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
-
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	Camera camera(width, height, glm::vec3(0.0f, 0.5f, 2.0f));
@@ -232,8 +236,8 @@ int main()
 		skyBoxShaderProgram);
 	*/
 
-	Mesh pyramid(verts, ind, material, false, true, true);
-	Plane plane(10.0f, 10, 1.0f, material);
+	//Mesh pyramid(verts, ind, material, false, true, true);
+	//Plane plane(10.0f, 10, 1.0f, material);
 
 	Transform defaultTransform(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 	
@@ -242,6 +246,7 @@ int main()
 	//MeshScene importedDonut(Transform(glm::vec3(-2.5f, 0.25f, 0.0f), glm::vec3(0.0f), glm::vec3(0.5f)), nullptr, std::vector<const char*>{ "../../engine_resource/3D Objects/colored_donut/colored_donut.obj", "../../engine_resource/3D Objects/colored_donut/colored_donut_lod_1.obj" }, shaderProgram, nullptr, false, true);
 	
 	MeshScene walls(Transform::Zero, nullptr, std::vector<const char*>{ "../../engine_resource/3D Objects/tower/walls/walls.obj" }, glassShaderProgram, glass, false, true);
+	MeshScene floor(Transform::Zero, nullptr, std::vector<const char*>{ "../../engine_resource/3D Objects/tower/floor/floor.obj" }, shaderProgram, nullptr, false, true);
 	MeshScene floor1(Transform::Zero, nullptr, std::vector<const char*>{ "../../engine_resource/3D Objects/tower/floor1/floor1.obj" }, shaderProgram, nullptr, false, true);
 	MeshScene floor2(Transform::Zero, nullptr, std::vector<const char*>{ "../../engine_resource/3D Objects/tower/floor2/floor2.obj" }, shaderProgram, nullptr, false, true);
 	MeshScene floor3(Transform::Zero, nullptr, std::vector<const char*>{ "../../engine_resource/3D Objects/tower/floor3/floor3.obj" }, shaderProgram, nullptr, false, true);
@@ -298,7 +303,7 @@ int main()
 		GameSaver::Load(inputSave, &playerCollectablesPickedUp);
 	}
 
-	inputSave.close();
+	inputSave.close(); 
 
 	MeshScene collectable1(Transform(glm::vec3(4.1f, 10.8f, 5.4f), glm::vec3(0.0f), glm::vec3(1.0f)), collectableBh1, std::vector<const char*>{ "../../engine_resource/3D Objects/tower/collectables/collectable.obj", "../../engine_resource/3D Objects/tower/collectables/collectable_lod.obj" }, shaderProgram, nullptr, false, false);
 	MeshScene collectable2(Transform(glm::vec3(9.3f, 26.9f, 8.9f), glm::vec3(0.0f), glm::vec3(1.0f)), collectableBh2, std::vector<const char*>{ "../../engine_resource/3D Objects/tower/collectables/collectable.obj", "../../engine_resource/3D Objects/tower/collectables/collectable_lod.obj" }, shaderProgram, nullptr, false, false);
@@ -310,14 +315,14 @@ int main()
 	MeshScene collectable8(Transform(glm::vec3(8.2f, 63.8f, -1.8f), glm::vec3(0.0f), glm::vec3(1.0f)), collectableBh8, std::vector<const char*>{ "../../engine_resource/3D Objects/tower/collectables/collectable.obj", "../../engine_resource/3D Objects/tower/collectables/collectable_lod.obj" }, shaderProgram, nullptr, false, false);
 
 	//GameObject smallPyramid(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), pyramid, nullptr);
-	GameObject planeObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), plane.mesh, nullptr);
+	//GameObject planeObject(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f), plane.mesh, nullptr);
 	PlayerController* playerController = new PlayerController(2.0f, 0.6f, &camera, glm::vec3(0.35f, 0.7f, 0.35f));
-	GameObject player(glm::vec3(loadPlayerPos.x, loadPlayerPos.y + 0.25f, loadPlayerPos.z)/*glm::vec3(-0.05, 71.65f, 0.15f)*/, glm::vec3(0.0f), glm::vec3(1.0f), Mesh(), playerController);
+	GameObject player(glm::vec3(loadPlayerPos.x, loadPlayerPos.y + 0.75f, loadPlayerPos.z)/*glm::vec3(-0.05, 71.65f, 0.15f)*/, glm::vec3(0.0f), glm::vec3(1.0f), Mesh(), playerController);
 	
 	playerController->collectablesPickedUp = playerCollectablesPickedUp;
 
 	//CollisionMesh pyramidCollider(verts, ind, smallPyramid.transform.matrix, &smallPyramid, true);
-	CollisionMesh planeCollider(plane.mesh.vertices, plane.mesh.indices, planeObject.transform.matrix, &planeObject, true);
+	//CollisionMesh planeCollider(plane.mesh.vertices, plane.mesh.indices, planeObject.transform.matrix, &planeObject, true);
 
 	ShadowChunker shadowChunker(0.5f);
 	ssaoRenderer.InitializeKernels();
@@ -329,16 +334,18 @@ int main()
 	LightHandler::Instance.SetLightUniforms(lightingShaderProgram);
 
 	//Audio player
+	
 	AudioPlayer::Instance.InitializeSoundEngine();
 
 	AudioPlayer::Instance.SetSoundtracks(std::vector<Soundtrack>{
 		Soundtrack{ "../../engine_resource/Sound/soundtracks/wind-troubles-the-water-138702.mp3", 0.05f },
-		Soundtrack{ "../../engine_resource/Sound/soundtracks/slow-motion-121841.mp3", 0.05f },
 		Soundtrack{ "../../engine_resource/Sound/soundtracks/relaxing-music-vol1-124477.mp3", 0.175f },
-		Soundtrack{ "../../engine_resource/Sound/soundtracks/relaxing-music-vol12-131317.mp3", 0.1f }
+		Soundtrack{ "../../engine_resource/Sound/soundtracks/relaxing-music-vol12-131317.mp3", 0.1f },
+		Soundtrack{ "../../engine_resource/Sound/soundtracks/endless-by-prabajithk-118998.mp3", 0.075f }
 	});
-	AudioPlayer::Instance.PlaySoundtrack(2, false);
-
+	AudioPlayer::Instance.PlaySoundtrack(0, true);
+	AudioPlayer::Instance.Play3DSound("../../engine_resource/Sound/soundeffects/landing.wav", glm::vec3(0.0f), 1.0f, 0.0f, false); //prevents lag spike
+	
 	irrklang::ISound* windSound = AudioPlayer::Instance.soundEngine->play2D("../../engine_resource/Sound/soundeffects/wind-blowing-sfx-12809.mp3", true, false, true);
 	windSound->setVolume(0.0f);
 
@@ -538,6 +545,11 @@ int main()
 			renderedCurrentTime += deltaTime;
 		}
 
+		if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS && Transitioner::Instance.threshold >= 2.0f)
+		{
+			renderedCurrentTime = 0.0;
+		}
+
 		int hours = int(renderedCurrentTime) / 3600;
 		int minutes = int(renderedCurrentTime) / 60 - hours * 60;
 		double seconds = renderedCurrentTime - minutes * 60.0;
@@ -598,6 +610,8 @@ int main()
 		glfwPollEvents();
 	}
 
+	std::cout << "program ended" << std::endl;
+
 	//save game
 	std::ofstream outputSave;
 	outputSave.open("../../engine_resource/Save Games/save1.txt", std::ios::binary);
@@ -630,6 +644,7 @@ int main()
 	AudioPlayer::Instance.soundEngine->drop();
 	//importedCube.Clear();
 	walls.Clear();
+	floor.Clear();
 	floor1.Clear();
 	floor2.Clear();
 	floor3.Clear();
